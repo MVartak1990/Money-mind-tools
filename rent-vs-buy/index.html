@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rent vs Buy Calculator · The Extraordinary Money Mind</title>
+<meta name="description" content="Free calculator from The Extraordinary Money Mind: run the 4-step Rent-or-Buy Test on your own numbers and see your break-even years, monthly unrecoverable cost and price-to-rent ratio.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rent vs Buy Calculator">
+<meta property="og:description" content="Free calculator from The Extraordinary Money Mind: run the 4-step Rent-or-Buy Test on your own numbers and see your break-even years, monthly unrecoverable cost and price-to-rent ratio.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the four-step test, then two columns: inputs grouped by step (left) and a sticky verdict + chart (right); one column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6;
+  --field: #FFFDF8; --band: #14213D; --band-ink: #FFF6E5; --own: #E4572E; --rent: #1B998B; --grid: #EFE6D2;
+  --chip: #FFF0C9; --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A;
+  --field: #0F1A33; --band: #0A1226; --band-ink: #FFF6E5; --own: #FF7A55; --rent: #3CC3B2; --grid: #22305A;
+  --chip: #2A3150; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A;
+  --field: #0F1A33; --band: #0A1226; --band-ink: #FFF6E5; --own: #FF7A55; --rent: #3CC3B2; --grid: #22305A;
+  --chip: #2A3150; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+img { max-width: 100% }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: var(--band); color: var(--band-ink) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.steps4 { display: flex; flex-wrap: wrap; gap: 8px }
+.steps4 span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.s1 { background: var(--yellow) } .s2 { background: #2FC2B0 } .s3 { background: #FF8AB6 } .s4 { background: #8FB2FF }
+.lede { max-width: 66ch; color: color-mix(in srgb, var(--band-ink) 82%, transparent); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+.presets button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+.presets button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow) }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0 }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+.in { position: relative; display: flex; align-items: center }
+.in .pre, .in .suf { position: absolute; color: var(--muted); font: 700 14px/1 var(--display); pointer-events: none }
+.in .pre { left: 11px } .in .suf { right: 11px }
+input[type="number"] { width: 100%; font: 700 16px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; min-width: 0; -moz-appearance: textfield }
+.in.has-pre input { padding-left: 26px } .in.has-suf input { padding-right: 52px }
+.sum { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; font: 700 13.5px/1.3 var(--display); color: var(--muted); flex-wrap: wrap }
+.sum b { color: var(--ink); font-weight: 800 }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); min-width: 0 }
+.headline { background: var(--navy); color: var(--cream); border: 0; display: grid; gap: 10px }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .headline { background: #0A1226 } }
+:root[data-theme="dark"] .headline { background: #0A1226 }
+.big { font: 900 clamp(34px, 7vw, 44px)/1.05 var(--display); letter-spacing: -.02em }
+.vline { font: 700 13.5px/1.4 var(--display); color: color-mix(in srgb, var(--cream) 85%, transparent) }
+.vline b { color: var(--cream) }
+.verdict { display: inline-flex; align-items: center; font: 900 14px/1 var(--display); letter-spacing: .12em; padding: 9px 14px; border-radius: 9px; width: max-content; max-width: 100%; color: var(--navy) }
+.verdict.rent { background: #3CC3B2 } .verdict.buy { background: #FF9A6B } .verdict.close { background: var(--yellow) }
+.card h3 { margin: 0 0 10px; font: 800 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.rows { display: grid; gap: 8px }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; font-size: 13.5px }
+.pill { font: 800 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 6px; color: var(--navy); white-space: nowrap }
+.pill.r { background: #3CC3B2 } .pill.b { background: #FF9A6B } .pill.m { background: var(--yellow) }
+.chart svg { width: 100%; height: auto; display: block }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); margin-top: 8px }
+.legend i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; margin-right: 6px; vertical-align: middle }
+.btn { font: 800 13px/1 var(--display); padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer }
+.btn.ghost { background: transparent; color: var(--ink) }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
+#copybox { width: 100%; font: 600 13px/1.4 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; resize: none }
+.copied { font-size: 12.5px; color: var(--rent); min-height: 1em }
+footer { border-top: 1px solid var(--line) }
+footer .wrap { padding-block: 18px 30px; display: grid; gap: 8px; color: var(--muted); font-size: 12.5px }
+footer p { margin: 0; max-width: 92ch }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div class="kicker"><a href="../" style="color:inherit;text-decoration:none" title="All calculators">The Extraordinary Money Mind</a> · Calculator</div>
+    <h1>Rent or buy: run the test on your numbers</h1>
+    <div class="steps4"><span class="s1">1 · UNRECOVERABLE NUMBER</span><span class="s2">2 · YOUR YEARS</span><span class="s3">3 · PRICE-TO-RENT</span><span class="s4">4 · THE RENTER'S RULE</span></div>
+    <p class="lede">Compare a home you would buy with the rent for a similar place. Results update as you type. Start from Maya's example in the video, or enter your own numbers.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Load an example">
+    <span class="lbl">Example</span>
+    <button type="button" data-preset="maya" aria-pressed="true">Maya · US starter home</button>
+    <button type="button" data-preset="toronto" aria-pressed="false">Toronto condo</button>
+    <button type="button" data-preset="blank" aria-pressed="false">My own numbers</button>
+  </div>
+  <p class="note" id="exampleNote"></p>
+
+  <div class="grid">
+    <form class="steps" id="calc" autocomplete="off">
+      <section class="step">
+        <h2><span class="num s1">1</span>The home and the rent</h2>
+        <p class="hint">Use a home you would really buy and the rent for a similar place nearby.</p>
+        <div class="fields">
+          <div class="f"><label for="price">Home price</label><div class="in has-pre"><span class="pre">$</span><input id="price" type="number" min="0" step="1000" inputmode="decimal"></div></div>
+          <div class="f"><label for="rent">Rent for a similar place</label><div class="in has-pre has-suf"><span class="pre">$</span><input id="rent" type="number" min="0" step="10" inputmode="decimal"><span class="suf">/mo</span></div></div>
+          <div class="f"><label for="down">Down payment</label><div class="in has-suf"><input id="down" type="number" min="0" max="100" step="0.5" inputmode="decimal"><span class="suf">%</span></div></div>
+          <div class="f"><label for="rate">Mortgage rate</label><div class="in has-suf"><input id="rate" type="number" min="0" max="20" step="0.01" inputmode="decimal"><span class="suf">%</span></div><small>US 30-yr avg 7.18% (Freddie Mac, Nov 5, 2026)</small></div>
+          <div class="f"><label for="amort">Amortization</label><div class="in has-suf"><input id="amort" type="number" min="5" max="40" step="1" inputmode="numeric"><span class="suf">yrs</span></div><small>US 30, Canada usually 25</small></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num s2">2</span>Owning costs you don't get back</h2>
+        <p class="hint">Percentages are of the home's value, per year.</p>
+        <div class="fields">
+          <div class="f"><label for="tax">Property tax</label><div class="in has-suf"><input id="tax" type="number" min="0" max="5" step="0.05" inputmode="decimal"><span class="suf">%/yr</span></div></div>
+          <div class="f"><label for="upkeep">Upkeep and insurance</label><div class="in has-suf"><input id="upkeep" type="number" min="0" max="5" step="0.05" inputmode="decimal"><span class="suf">%/yr</span></div></div>
+          <div class="f"><label for="hoa">Condo or HOA fees</label><div class="in has-pre has-suf"><span class="pre">$</span><input id="hoa" type="number" min="0" step="10" inputmode="decimal"><span class="suf">/mo</span></div></div>
+          <div class="f"><label for="buyc">Buying costs</label><div class="in has-suf"><input id="buyc" type="number" min="0" max="15" step="0.1" inputmode="decimal"><span class="suf">%</span></div><small>Closing costs, land transfer tax</small></div>
+          <div class="f"><label for="sellc">Selling costs</label><div class="in has-suf"><input id="sellc" type="number" min="0" max="15" step="0.1" inputmode="decimal"><span class="suf">%</span></div><small>Commission + closing, about 7%</small></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num s3">3</span>Your assumptions</h2>
+        <p class="hint">Nobody knows these. Try a cautious and a hopeful set and see how much the answer moves.</p>
+        <div class="fields">
+          <div class="f"><label for="hg">Home prices grow</label><div class="in has-suf"><input id="hg" type="number" min="-10" max="15" step="0.1" inputmode="decimal"><span class="suf">%/yr</span></div></div>
+          <div class="f"><label for="rg">Rent grows</label><div class="in has-suf"><input id="rg" type="number" min="-10" max="15" step="0.1" inputmode="decimal"><span class="suf">%/yr</span></div></div>
+          <div class="f"><label for="ret">Investments return</label><div class="in has-suf"><input id="ret" type="number" min="-10" max="15" step="0.1" inputmode="decimal"><span class="suf">%/yr</span></div><small>Before inflation, before tax</small></div>
+          <div class="f"><label for="stay">Years you expect to stay</label><div class="in has-suf"><input id="stay" type="number" min="1" max="40" step="1" inputmode="numeric"><span class="suf">yrs</span></div></div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Step 1 · Your unrecoverable number</div>
+        <div class="big" id="unrec">$0/mo</div>
+        <div class="vline">Price × (rate − 1%) ÷ 12 <span id="unrecPct"></span> vs rent <b id="rentTxt">$0</b></div>
+        <div class="verdict" id="verdict">ADD YOUR NUMBERS</div>
+        <div class="vline" id="vtext"></div>
+      </div>
+
+      <div class="card">
+        <h3>The four steps</h3>
+        <div class="rows" id="steps"></div>
+      </div>
+
+      <div class="card chart">
+        <h3>Buying minus renting, net worth</h3>
+        <div id="chart"></div>
+        <div class="legend"><span><i style="background:var(--own)"></i>Renter invests the gap</span><span><i style="background:var(--yellow)"></i>Renter spends the gap</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Your first month of owning</h3>
+        <div class="rows" id="month"></div>
+      </div>
+
+      <div class="card">
+        <h3>Share your result</h3>
+        <textarea id="copybox" rows="3" readonly aria-label="Your result as text"></textarea>
+        <div class="actions">
+          <button type="button" class="btn" id="copyBtn">Copy my result</button>
+          <button type="button" class="btn ghost" id="resetBtn">Clear all</button>
+        </div>
+        <div class="copied" id="copied" role="status"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>From the video "Rent vs Buy: Who's Really Throwing Money Away?" on The Extraordinary Money Mind. Maya is an example. The model compares two people who start with the same money: the buyer pays the down payment and buying costs; the renter invests that money, and every month whoever spends less invests the difference. Owning net worth = home value minus selling costs minus the loan balance, plus any savings. Step 1 updates Ben Felix's 5% rule (PWL Capital, 2019) for today's rates: property tax 1% + upkeep 1% + (mortgage rate − 3%).</p>
+    <p>Sources: Realtor.com rent reports (2026), Freddie Mac PMMS, TRREB Market Watch (Sept 2026), Ratehub (Nov 3, 2026), Clever Real Estate seller survey (2026). For education only, not financial advice. Numbers you enter stay in this browser.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var IDS = ['price','rent','down','rate','amort','tax','upkeep','hoa','buyc','sellc','hg','rg','ret','stay'];
+  var PRESETS = {
+    maya: { v: { price: 310000, rent: 1700, down: 10, rate: 7.24, amort: 30, tax: 1, upkeep: 1, hoa: 0, buyc: 3, sellc: 7, hg: 3, rg: 3, ret: 7, stay: 7 }, note: "Maya's example from the video: $310,000 starter home, 10% down at 7.24%, $1,700 rent. Replace any number with yours." },
+    toronto: { v: { price: 640000, rent: 2600, down: 20, rate: 4.44, amort: 25, tax: 0.7, upkeep: 0.5, hoa: 600, buyc: 4, sellc: 5, hg: 3, rg: 3, ret: 7, stay: 7 }, note: 'Toronto condo example: $640,000 (TRREB average condo apartment, Sept 2026), 4.44% 5-year fixed. The rent and condo fee are placeholders: enter the rent and fee for a similar unit.' },
+    blank: { v: { price: '', rent: '', down: 10, rate: 7, amort: 30, tax: 1, upkeep: 1, hoa: 0, buyc: 3, sellc: 7, hg: 3, rg: 3, ret: 7, stay: 7 }, note: 'Enter your own numbers. Nothing you type leaves this browser.' }
+  };
+  var state = { preset: 'maya' };
+  function v(id) { var x = parseFloat($(id).value); return isFinite(x) ? x : 0; }
+  function money(x) { return (x < 0 ? '−$' : '$') + Math.round(Math.abs(x)).toLocaleString('en-US'); }
+
+  function sim(o, spendGap) {
+    var L = o.price * (1 - o.down / 100), m = o.rate / 1200, n = o.amort * 12;
+    var pi = m > 0 ? L * m / (1 - Math.pow(1 + m, -n)) : L / n;
+    var bal = L, home = o.price, rent = o.rent, rm = Math.pow(1 + o.ret / 100, 1 / 12) - 1;
+    var renter = o.price * (o.down + o.buyc) / 100, owner = 0, out = [], int1 = 0;
+    out.push(home * (1 - o.sellc / 100) - bal - renter);
+    for (var mo = 1; mo <= 360; mo++) {
+      var intr = bal * m, pay = mo <= n ? pi : 0, prin = Math.min(bal, pay - intr); if (mo <= n) bal = Math.max(0, bal - prin);
+      if (mo <= 12) int1 += intr;
+      var own = (mo <= n ? pi : 0) + (o.tax + o.upkeep) / 100 * home / 12 + o.hoa;
+      var diff = own - rent; renter *= 1 + rm; owner *= 1 + rm;
+      if (diff > 0) { if (!spendGap) renter += diff; } else owner += -diff;
+      if (mo % 12 === 0) { home *= 1 + o.hg / 100; rent *= 1 + o.rg / 100; out.push(home * (1 - o.sellc / 100) - bal + owner - renter); }
+    }
+    return { pi: pi, int1: int1, d: out };
+  }
+  function breakEven(d) { for (var y = 1; y < d.length; y++) if (d[y] > 0) return y; return null; }
+
+  function chart(a, b) {
+    var W = 360, H = 200, P = { l: 44, r: 10, t: 10, b: 24 }, Y = 25;
+    var vals = a.slice(0, Y + 1).concat(b.slice(0, Y + 1));
+    var lo = Math.min(0, Math.min.apply(null, vals)), hi = Math.max(0, Math.max.apply(null, vals)); if (hi - lo < 1) hi = lo + 1;
+    var x = function (i) { return P.l + i / Y * (W - P.l - P.r); }, y = function (val) { return P.t + (hi - val) / (hi - lo) * (H - P.t - P.b); };
+    var path = function (d) { return d.slice(0, Y + 1).map(function (val, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(val).toFixed(1); }).join(' '); };
+    var ticks = [0, 5, 10, 15, 20, 25].map(function (t) { return '<text x="' + x(t) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + (t ? t : 'yr 0') + '</text>'; }).join('');
+    var lab = function (val) { var k = Math.abs(val) >= 1e6 ? (val / 1e6).toFixed(1) + 'M' : Math.round(val / 1000) + 'K'; return (val < 0 ? '−$' : '$') + k.replace('-', ''); };
+    var yl = [hi, 0, lo].filter(function (val, i, arr) { return arr.indexOf(val) === i; }).map(function (val) { return '<text x="' + (P.l - 6) + '" y="' + (y(val) + 3) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + lab(val) + '</text>'; }).join('');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Buying minus renting over 25 years">' +
+      '<rect x="' + P.l + '" y="' + P.t + '" width="' + (W - P.l - P.r) + '" height="' + (H - P.t - P.b) + '" fill="none" stroke="var(--grid)" />' +
+      '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--muted)" stroke-width="1.5" />' +
+      '<text x="' + (P.l + 6) + '" y="' + (y(0) - 6) + '" font-size="10" fill="var(--muted)">buying ahead ↑ · renting ahead ↓</text>' +
+      '<path d="' + path(b) + '" fill="none" stroke="var(--yellow)" stroke-width="3" stroke-dasharray="6 4" />' +
+      '<path d="' + path(a) + '" fill="none" stroke="var(--own)" stroke-width="3.5" />' + ticks + yl + '</svg>';
+  }
+
+  function update() {
+    var o = {}; IDS.forEach(function (k) { o[k] = v(k); });
+    var ok = o.price > 0 && o.rent > 0;
+    var un = o.price * (o.rate - 1) / 100 / 12;
+    $('unrec').textContent = ok ? money(un) + '/mo' : '$0/mo';
+    $('unrecPct').textContent = ok ? '(' + (o.rate - 1).toFixed(2) + '% a year)' : '';
+    $('rentTxt').textContent = money(o.rent);
+    var r = sim(o, false), s = sim(o, true), be = breakEven(r.d), bs = breakEven(s.d), ptr = o.rent > 0 ? o.price / (o.rent * 12) : 0;
+    var vd = $('verdict'), vt = $('vtext'), verdict = '';
+    if (!ok) { vd.className = 'verdict close'; vd.textContent = 'ADD YOUR NUMBERS'; vt.textContent = 'Enter a home price and a similar rent.'; }
+    else {
+      var gap = (un - o.rent) / o.rent;
+      if (gap > 0.1) { verdict = 'LEANS RENT'; vd.className = 'verdict rent'; }
+      else if (gap < -0.1) { verdict = 'LEANS BUY'; vd.className = 'verdict buy'; }
+      else { verdict = 'CLOSE CALL'; vd.className = 'verdict close'; }
+      vd.textContent = verdict;
+      vt.innerHTML = be ? 'With your assumptions, buying pulls ahead after <b>' + be + ' years</b>. You expect to stay <b>' + o.stay + '</b>.' : 'With your assumptions, buying does not pull ahead within 30 years.';
+    }
+    var stayD = r.d[Math.min(r.d.length - 1, Math.max(1, Math.round(o.stay)))] || 0;
+    var rows = [
+      ['1 · Unrecoverable number vs rent', ok ? money(un) + ' vs ' + money(o.rent) : '–', !ok ? '' : (un > o.rent * 1.1 ? '<span class="pill r">RENT</span>' : un < o.rent * 0.9 ? '<span class="pill b">BUY</span>' : '<span class="pill m">CLOSE</span>')],
+      ['2 · Years to break even', ok ? (be ? be + ' yrs' : '30+ yrs') : '–', !ok ? '' : (be && be <= o.stay ? '<span class="pill b">BUY</span>' : '<span class="pill r">RENT</span>')],
+      ['3 · Price-to-rent ratio', ok ? ptr.toFixed(1) : '–', !ok ? '' : (ptr < 15 ? '<span class="pill b">LEANS BUY</span>' : ptr > 20 ? '<span class="pill r">LEANS RENT</span>' : '<span class="pill m">DEPENDS</span>')],
+      ['4 · If you rent and spend the gap', ok ? (bs ? 'buying wins in ' + bs + ' yrs' : 'renting still wins') : '–', ok ? '<span class="pill m">RULE</span>' : '']
+    ];
+    $('steps').innerHTML = rows.map(function (x) { return '<div class="row"><span>' + x[0] + '</span><b>' + x[1] + '</b>' + (x[2] || '<span></span>') + '</div>'; }).join('') +
+      (ok ? '<p class="note" style="margin-top:6px">At year ' + Math.round(o.stay) + ', buying is ' + (stayD >= 0 ? 'ahead by ' : 'behind by ') + money(Math.abs(stayD)) + ' if the renter invests the gap.</p>' : '');
+    $('chart').innerHTML = ok ? chart(r.d, s.d) : '<p class="note">Enter your numbers to see the chart.</p>';
+    var tm = o.tax / 100 * o.price / 12, um = o.upkeep / 100 * o.price / 12, tot = r.pi + tm + um + o.hoa;
+    $('month').innerHTML = ok ? [['Mortgage payment', r.pi], ['  of which interest (year-1 average)', r.int1 / 12], ['Property tax', tm], ['Upkeep and insurance', um], ['Condo or HOA fees', o.hoa], ['Total to own', tot], ['Rent', o.rent]].map(function (x) { return '<div class="row"><span>' + x[0] + '</span><b>' + money(x[1]) + '</b><span></span></div>'; }).join('') + '<p class="note" style="margin-top:6px">Gap to invest if you rent: <b>' + money(Math.max(0, tot - o.rent)) + '/mo</b>, plus ' + money(o.price * (o.down + o.buyc) / 100) + ' up front.</p>' : '';
+    $('copybox').value = ok ? 'Rent vs buy on ' + money(o.price) + ' vs ' + money(o.rent) + '/mo rent: unrecoverable ' + money(un) + '/mo (' + verdict + '), break-even ' + (be ? be + ' years' : '30+ years') + ', price-to-rent ' + ptr.toFixed(1) + '.' : '';
+    try { var d = { preset: state.preset, v: {} }; IDS.forEach(function (k) { d.v[k] = $(k).value; }); localStorage.setItem('rvb-v1', JSON.stringify(d)); } catch (e) {}
+  }
+  function load(name) {
+    var p = PRESETS[name]; state.preset = name;
+    IDS.forEach(function (k) { $(k).value = p.v[k]; });
+    document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === name); });
+    $('exampleNote').textContent = p.note; update();
+  }
+  function restore() {
+    try { var d = JSON.parse(localStorage.getItem('rvb-v1') || 'null'); if (!d || !d.v) return false;
+      IDS.forEach(function (k) { if (k in d.v) $(k).value = d.v[k]; }); state.preset = d.preset || 'blank';
+      document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === state.preset); });
+      $('exampleNote').textContent = (PRESETS[state.preset] || PRESETS.blank).note; return true; } catch (e) { return false; }
+  }
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { load(b.dataset.preset); }); });
+  $('calc').addEventListener('input', function () {
+    if (state.preset !== 'blank') { state.preset = 'blank'; document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === 'blank'); }); $('exampleNote').textContent = PRESETS.blank.note; }
+    update();
+  });
+  $('calc').addEventListener('submit', function (e) { e.preventDefault(); });
+  $('resetBtn').addEventListener('click', function () { load('blank'); });
+  $('copyBtn').addEventListener('click', function () {
+    var txt = $('copybox').value, done = function () { $('copied').textContent = 'Copied. Paste it in the comments.'; };
+    try { navigator.clipboard.writeText(txt).then(done, function () { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }); }
+    catch (e) { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }
+  });
+  if (!restore()) load('maya'); else update();
+})();
+</script>
+</body>
+</html>

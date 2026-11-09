@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Next Door Test Calculator · The Extraordinary Money Mind</title>
+<meta name="description" content="Free calculator from The Extraordinary Money Mind: run the Millionaire Next Door formula on your own numbers and see if you're a PAW, on the way, or a UAW.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Next Door Test Calculator">
+<meta property="og:description" content="Free calculator from The Extraordinary Money Mind: run the Millionaire Next Door formula on your own numbers and see if you're a PAW, on the way, or a UAW.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: navy band with the formula, then inputs (left) and a sticky verdict card with a PAW/UAW scale (right); one column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --teal: #1B998B; --blue: #5B8DEF;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8;
+  --band: #14213D; --band-ink: #FFF6E5; --chip: #FFF0C9;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --font: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33;
+  --band: #0A1226; --band-ink: #FFF6E5; --chip: #2A3150; --teal: #3CC3B2; --red: #FF7A55;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33;
+  --band: #0A1226; --band-ink: #FFF6E5; --chip: #2A3150; --teal: #3CC3B2; --red: #FF7A55;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+img { max-width: 100% }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header { background: var(--band); color: var(--band-ink) }
+header .wrap { padding-block: 26px 24px; display: grid; gap: 10px }
+.kicker { font: 800 12px/1 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(28px, 5vw, 44px)/1.05 var(--font); margin: 0; text-wrap: balance }
+.formula { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font: 800 13px/1 var(--font); letter-spacing: .04em }
+.formula .t { padding: 7px 10px; border-radius: 8px; background: #FFF6E5; color: #14213D }
+.formula .r { background: var(--yellow) }
+.lede { max-width: 64ch; margin: 0; opacity: .85 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 4px }
+.presets .lbl { font: 700 12px/1 var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.presets button { font: 700 13px/1 var(--font); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+.presets button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow) }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--font) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: #14213D; font: 900 14px/1 var(--font) }
+.n1 { background: var(--yellow) } .n2 { background: #2FC2B0 } .n3 { background: #FF8AB6 } .n4 { background: #8FB2FF }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--font) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+.in { position: relative; display: flex; align-items: center }
+.in .pre { position: absolute; left: 11px; color: var(--muted); font: 700 14px/1 var(--font); pointer-events: none }
+input[type="number"] { width: 100%; font: 700 16px/1 var(--font); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; min-width: 0 }
+.in.has-pre input { padding-left: 26px }
+.sum { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; font: 700 13.5px/1.2 var(--font); color: var(--muted) }
+.sum b { color: var(--ink); font-weight: 800 }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); display: grid; gap: 12px }
+.verdict { display: inline-flex; align-items: center; gap: 8px; font: 900 13px/1 var(--font); letter-spacing: .12em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; color: #fff; width: max-content }
+.v-paw { background: var(--teal) } .v-way { background: var(--blue) } .v-uaw { background: var(--red) }
+.big { font: 900 40px/1 var(--font) }
+.row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px }
+.row span { color: var(--muted) } .row b { font-weight: 800 }
+.scale { position: relative; height: 92px; margin-top: 4px }
+.bands { position: absolute; left: 0; right: 0; top: 18px; height: 26px; display: grid; grid-template-columns: 20% 60% 20%; gap: 3px }
+.bands div { border-radius: 6px } .b1 { background: var(--red) } .b2 { background: var(--blue) } .b3 { background: var(--teal) }
+.tick { position: absolute; top: 48px; transform: translateX(-50%); font: 700 11px/1.2 var(--font); color: var(--muted); text-align: center; white-space: nowrap }
+.tick::before { content: ""; display: block; width: 2px; height: 6px; background: var(--muted); margin: 0 auto 3px }
+.blab { position: absolute; top: 0; font: 800 11px/1 var(--font); letter-spacing: .08em; color: var(--muted) }
+.marker { position: absolute; top: 12px; width: 18px; height: 38px; margin-left: -9px; border-radius: 9px; background: var(--yellow); border: 3px solid var(--ink); transition: left .25s ease }
+@media (prefers-reduced-motion: reduce) { .marker { transition: none } }
+.callout { background: var(--chip); border-radius: 10px; padding: 10px 12px; font-size: 13.5px }
+.callout b { font-weight: 800 }
+.lever { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px }
+.btn { font: 800 14px/1 var(--font); padding: 12px 14px; border-radius: 10px; border: 0; background: var(--ink); color: var(--bg); cursor: pointer }
+.copied { font-size: 12.5px; color: var(--muted); min-height: 1em }
+.foot { color: var(--muted); font-size: 12px; padding-block: 0 30px; max-width: 80ch }
+.foot p { margin: 0 0 6px }
+textarea { width: 100%; font: 500 13px/1.4 var(--font); border-radius: 10px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink); padding: 10px }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker"><a href="../" style="color:inherit;text-decoration:none" title="All calculators">The Extraordinary Money Mind</a> · Calculator</div>
+  <h1>The Next Door Test</h1>
+  <div class="formula" aria-label="Formula: age times household pre-tax income divided by ten equals your number">
+    <span class="t">AGE</span><span>×</span><span class="t">HOUSEHOLD PRE-TAX INCOME</span><span>÷</span><span class="t">10</span><span>=</span><span class="t r">YOUR NUMBER</span>
+  </div>
+  <p class="lede">The rule of thumb from <i>The Millionaire Next Door</i> (Stanley &amp; Danko, 1996). Compare it with your real net worth to see which group you're in, then check the fairer bar if you're young.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load an example</span>
+    <button type="button" data-p="dev">Dev, 40</button>
+    <button type="button" data-p="jess">Jess, 40</button>
+    <button type="button" data-p="ex35">Age 35, median income</button>
+  </div>
+  <p class="hint" style="margin:0 0 4px">Examples from the video. Type your own numbers over them; they stay in this browser only.</p>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num n1">1</span>Your number</h2>
+        <div class="fields">
+          <div class="f"><label for="age">Your age</label><div class="in"><input id="age" type="number" min="18" max="100" step="1" inputmode="numeric"></div></div>
+          <div class="f"><label for="inc">Household pre-tax income, per year</label><div class="in has-pre"><span class="pre">$</span><input id="inc" type="number" min="0" step="1000" inputmode="numeric"></div><small>All sources except inheritances.</small></div>
+          <div class="f"><label for="inh">Inherited wealth (optional)</label><div class="in has-pre"><span class="pre">$</span><input id="inh" type="number" min="0" step="1000" inputmode="numeric"></div><small>The book subtracts it from your number.</small></div>
+        </div>
+        <div class="sum"><span>Your number</span><b id="sNum">—</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num n2">2</span>Your real net worth</h2>
+        <p class="hint">Everything you own minus everything you owe.</p>
+        <div class="fields">
+          <div class="f"><label for="own">What you own</label><div class="in has-pre"><span class="pre">$</span><input id="own" type="number" min="0" step="1000" inputmode="numeric"></div><small>Cash, investments, retirement accounts, home value, car value.</small></div>
+          <div class="f"><label for="owe">What you owe</label><div class="in has-pre"><span class="pre">$</span><input id="owe" type="number" min="0" step="1000" inputmode="numeric"></div><small>Mortgage, car loan, student loans, cards.</small></div>
+          <div class="f"><label for="sal">Your salary (for the fairer bar)</label><div class="in has-pre"><span class="pre">$</span><input id="sal" type="number" min="0" step="1000" inputmode="numeric"></div><small>Optional. Leave blank to use household income.</small></div>
+        </div>
+        <div class="sum"><span>Net worth</span><b id="sNw">—</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num n3">3</span>Your group</h2>
+        <p class="hint">Twice your number or more: PAW (prodigious accumulator of wealth). Half or less: UAW (under accumulator). In between: on the way.</p>
+        <div class="callout" id="typical">—</div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num n4">4</span>Your lever</h2>
+        <ul class="lever" id="lever"></ul>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card">
+        <span class="verdict" id="vChip">—</span>
+        <div><div class="row"><span>Net worth vs your number</span></div><div class="big" id="ratio">—</div></div>
+        <div class="scale" aria-hidden="true">
+          <span class="blab" style="left:0">UAW</span><span class="blab" style="left:44%">ON THE WAY</span><span class="blab" style="right:0">PAW</span>
+          <div class="bands"><div class="b1"></div><div class="b2"></div><div class="b3"></div></div>
+          <div class="marker" id="mk" style="left:40%"></div>
+          <span class="tick" style="left:20%" id="t1">½×</span><span class="tick" style="left:40%" id="t2">1×</span><span class="tick" style="left:80%" id="t3">2×</span>
+        </div>
+        <div class="row"><span>Your number</span><b id="rNum">—</b></div>
+        <div class="row"><span>Your net worth</span><b id="rNw">—</b></div>
+        <div class="row"><span>PAW line (2×)</span><b id="rPaw">—</b></div>
+        <div class="row"><span>UAW line (½×)</span><b id="rUaw">—</b></div>
+        <div class="callout" id="fair">—</div>
+        <textarea id="txt" rows="4" readonly aria-label="Result text to copy"></textarea>
+        <button class="btn" id="copy" type="button">Copy my result</button>
+        <div class="copied" id="copied"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <p><b>Sources.</b> Formula and PAW/UAW groups: Thomas J. Stanley &amp; William D. Danko, <i>The Millionaire Next Door</i> (1996). Typical family by age: Federal Reserve, 2025 Survey of Consumer Finances (median net worth and income by age of family head). Fairer bar: Fidelity savings guideline (1× salary by 30, 3× by 40, 6× by 50, 8× by 60, 10× by 67; it counts retirement savings, so treat this as a rough check).</p>
+    <p>The formula assumes decades of earning and saving, so it is harsh on anyone under about 50. Education only, not financial advice.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var F = ['age', 'inc', 'inh', 'own', 'owe', 'sal'];
+  var P = {
+    dev:  {age: 40, inc: 97000, inh: 0, own: 640000, owe: 230000, sal: ''},
+    jess: {age: 40, inc: 97000, inh: 0, own: 655000, owe: 560000, sal: ''},
+    ex35: {age: 35, inc: 82200, inh: 0, own: 260000, owe: 200000, sal: ''}
+  };
+  // SCF 2025 medians by age of family head: [maxAge, medianNetWorth, medianIncome, label]
+  var SCF = [[34, 33000, 67800, 'under 35'], [44, 155600, 97000, '35–44'], [54, 253700, 108900, '45–54'], [64, 411900, 92400, '55–64'], [74, 431300, 69400, '65–74'], [200, 504900, 66800, '75+']];
+  var FID = [[30, 1], [40, 3], [50, 6], [60, 8], [67, 10]];
+  var money = function (n) { var s = Math.round(Math.abs(n)).toLocaleString('en-US'); return (n < 0 ? '−$' : '$') + s; };
+  var num = function (id) { var v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+  function fid(age) {
+    if (age < 30) return age >= 25 ? (age - 25) / 5 : 0;
+    for (var i = 1; i < FID.length; i++) if (age <= FID[i][0]) { var a = FID[i - 1], b = FID[i]; return a[1] + (b[1] - a[1]) * (age - a[0]) / (b[0] - a[0]); }
+    return 10;
+  }
+  function calc() {
+    var age = num('age'), inc = num('inc'), inh = num('inh'), nw = num('own') - num('owe'), sal = num('sal') || inc;
+    var n = Math.max(0, age * inc / 10 - inh);
+    $('sNum').textContent = n ? money(n) : '—'; $('sNw').textContent = money(nw);
+    $('rNum').textContent = money(n); $('rNw').textContent = money(nw); $('rPaw').textContent = money(2 * n); $('rUaw').textContent = money(n / 2);
+    var r = n > 0 ? nw / n : 0, g, cls;
+    if (r >= 2) { g = 'PAW'; cls = 'v-paw'; } else if (r <= 0.5) { g = 'UAW'; cls = 'v-uaw'; } else { g = 'On the way'; cls = 'v-way'; }
+    $('vChip').textContent = g; $('vChip').className = 'verdict ' + cls;
+    $('ratio').textContent = n > 0 ? r.toFixed(2) + '×' : '—';
+    $('mk').style.left = Math.max(1, Math.min(99, r / 2.5 * 100)) + '%';
+    var row = SCF.filter(function (x) { return age <= x[0]; })[0] || SCF[SCF.length - 1];
+    var tn = age * row[2] / 10;
+    $('typical').innerHTML = 'Typical family, age ' + row[3] + ': median net worth <b>' + money(row[1]) + '</b> on a median income of ' + money(row[2]) + '. The formula would ask them for ' + money(tn) + ', so they sit at ' + Math.round(row[1] / tn * 100) + '% of it.';
+    var fm = fid(age), fb = fm * sal;
+    $('fair').innerHTML = age < 25 ? 'Under 25: no fair benchmark yet. Build the gap between earning and spending first.' :
+      'Fairer bar at ' + age + ': about <b>' + fm.toFixed(1) + '× salary</b> saved (' + money(fb) + '). You have ' + (fb > 0 ? (nw / sal).toFixed(1) + '× ' : '') + (nw >= fb ? '— on track by this bar.' : '— below this bar.');
+    var L = [];
+    if (g === 'UAW') L = ['Start with the gap: track what you earn and what you spend for one month.', 'Automate an investment on payday; work up to 15%, then toward 20% of income.', 'Pause big status buys (new car, bigger house) until the gap is positive every month.'];
+    else if (g === 'On the way') L = ['Push investing toward 20% of income.', 'Keep cars and housing modest relative to income as it grows.', 'Re-run the test every birthday and watch the ratio climb.'];
+    else L = ['Keep doing what works: invest ~20% and plan your investments regularly.', 'Watch lifestyle creep as income rises.', 'Re-run the test every birthday.'];
+    $('lever').innerHTML = L.map(function (t) { return '<li>' + t + '</li>'; }).join('');
+    $('txt').value = 'Next Door Test: age ' + age + ', income ' + money(inc) + '. My number: ' + money(n) + '. Net worth: ' + money(nw) + ' (' + (n > 0 ? r.toFixed(2) : '0') + '×). Group: ' + g + '. (The Extraordinary Money Mind)';
+    try { var s = {}; F.forEach(function (k) { s[k] = $(k).value; }); localStorage.setItem('ndt', JSON.stringify(s)); } catch (e) {}
+  }
+  function load(o) { F.forEach(function (k) { $(k).value = o[k] === undefined ? '' : o[k]; }); calc(); }
+  document.querySelectorAll('.presets button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.presets button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true'); load(P[b.dataset.p]);
+    });
+  });
+  F.forEach(function (k) { $(k).addEventListener('input', function () { document.querySelectorAll('.presets button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); }); calc(); }); });
+  $('copy').addEventListener('click', function () {
+    var t = $('txt').value;
+    var done = function () { $('copied').textContent = 'Copied.'; };
+    var fail = function () { $('txt').select(); $('copied').textContent = 'Select the text above and copy it.'; };
+    try { navigator.clipboard.writeText(t).then(done, fail); } catch (e) { fail(); }
+  });
+  var saved = null; try { saved = JSON.parse(localStorage.getItem('ndt') || 'null'); } catch (e) {}
+  if (saved && saved.age) load(saved); else { document.querySelector('[data-p="dev"]').setAttribute('aria-pressed', 'true'); load(P.dev); }
+})();
+</script>
+</body>
+</html>

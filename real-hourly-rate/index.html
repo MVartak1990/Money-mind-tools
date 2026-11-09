@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real Hourly Rate Calculator · The Extraordinary Money Mind</title>
+<meta name="description" content="Free calculator from The Extraordinary Money Mind: find your side hustle's real hourly rate after fees, car costs, tax and every hour, then get a keep, fix or quit verdict.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Real Hourly Rate Calculator">
+<meta property="og:description" content="Free calculator from The Extraordinary Money Mind: find your side hustle's real hourly rate after fees, car costs, tax and every hour, then get a keep, fix or quit verdict.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band on top, then two columns: the five formula steps (left) and a sticky result card (right); one column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6;
+  --field: #FFFDF8; --band: #14213D; --band-ink: #FFF6E5; --good: #1B998B; --warn: #C98A00; --bad: #E4572E;
+  --chip: #FFF0C9; --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A;
+  --field: #0F1A33; --band: #0A1226; --band-ink: #FFF6E5; --good: #3CC3B2; --warn: #FFC93C; --bad: #FF7A55;
+  --chip: #2A3150; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A;
+  --field: #0F1A33; --band: #0A1226; --band-ink: #FFF6E5; --good: #3CC3B2; --warn: #FFC93C; --bad: #FF7A55;
+  --chip: #2A3150; --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark }
+
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+img { max-width: 100% }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: var(--band); color: var(--band-ink) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 10px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.formula { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font: 800 13px/1 var(--display); letter-spacing: .04em }
+.formula span.t { padding: 7px 10px; border-radius: 8px; color: var(--navy) }
+.formula span.op { opacity: .75; font-size: 16px }
+.t1 { background: var(--yellow) } .t2 { background: #2FC2B0 } .t3 { background: #FF8AB6 } .t4 { background: #8FB2FF } .t5 { background: #FF9A6B }
+.lede { max-width: 62ch; color: color-mix(in srgb, var(--band-ink) 82%, transparent); margin: 0 }
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+.presets button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+.presets button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.presets button:focus-visible, input:focus-visible, select:focus-visible, .btn:focus-visible, .seg button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow) }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.step .hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display); color: var(--ink) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+.in { position: relative; display: flex; align-items: center }
+.in .pre, .in .suf { position: absolute; color: var(--muted); font: 700 14px/1 var(--display); pointer-events: none }
+.in .pre { left: 11px } .in .suf { right: 11px }
+input[type="number"], select { width: 100%; font: 700 16px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; min-width: 0; -moz-appearance: textfield }
+input[type="number"]::-webkit-inner-spin-button { opacity: .4 }
+.in.has-pre input { padding-left: 26px } .in.has-suf input { padding-right: 44px }
+.sum { display: flex; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; font: 700 13.5px/1.2 var(--display); color: var(--muted) }
+.sum b { color: var(--ink); font-weight: 800 }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; width: max-content }
+.seg button { font: 800 13px/1 var(--display); padding: 11px 14px; background: var(--field); color: var(--muted); border: 0; cursor: pointer }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px }
+.check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--teal) }
+.callout { background: var(--chip); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--ink) }
+
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow) }
+.headline { background: var(--navy); color: var(--cream); border: 0; display: grid; gap: 10px }
+:root[data-theme="dark"] .headline { background: #0A1226 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .headline { background: #0A1226 } }
+.headline .kicker { color: var(--yellow) }
+.big { font: 900 clamp(48px, 9vw, 64px)/1 var(--display); letter-spacing: -.02em }
+.big small { font-size: .38em; font-weight: 800; letter-spacing: 0; margin-left: 4px; opacity: .8 }
+.vs { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 700 13px/1.3 var(--display); color: color-mix(in srgb, var(--cream) 80%, transparent) }
+.vs b { color: var(--cream) }
+.verdict { display: inline-flex; align-items: center; gap: 8px; font: 900 15px/1 var(--display); letter-spacing: .12em; padding: 9px 14px; border-radius: 9px; width: max-content; color: var(--navy) }
+.verdict.keep { background: #3CC3B2 } .verdict.fix { background: var(--yellow) } .verdict.quit { background: #FF7A55 }
+.vtext { margin: 0; font-size: 13.5px; color: color-mix(in srgb, var(--cream) 88%, transparent) }
+
+.card h3 { margin: 0 0 10px; font: 800 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; background: var(--line) }
+.bar span { display: block; height: 100%; min-width: 0; transition: width .25s ease }
+.legend { display: grid; gap: 6px; margin-top: 12px }
+.legend div { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: middle }
+.legend .keep { font-weight: 800; border-top: 1px solid var(--line); padding-top: 6px }
+.bench { display: grid; gap: 8px }
+.brow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; font-size: 13.5px }
+.pill { font: 800 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 6px; color: var(--navy) }
+.pill.ok { background: #3CC3B2 } .pill.no { background: #FF9A6B }
+.levers { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none }
+.levers li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; font-size: 13.5px; align-items: baseline }
+.levers li b { font-weight: 800 }
+.actions { display: flex; flex-wrap: wrap; gap: 8px }
+.btn { font: 800 13px/1 var(--display); padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer }
+.btn.ghost { background: transparent; color: var(--ink) }
+.copied { font-size: 12.5px; color: var(--good); min-height: 1em }
+#copybox { width: 100%; font: 600 13px/1.4 var(--body); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; resize: none }
+footer { border-top: 1px solid var(--line) }
+footer .wrap { padding-block: 18px 30px; display: grid; gap: 8px; color: var(--muted); font-size: 12.5px }
+footer p { margin: 0; max-width: 90ch }
+@media (prefers-reduced-motion: reduce) { .bar span { transition: none } }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div class="kicker"><a href="../" style="color:inherit;text-decoration:none" title="All calculators">The Extraordinary Money Mind</a> · Calculator</div>
+    <h1>Your side hustle's real hourly rate</h1>
+    <div class="formula" aria-label="Formula: gross minus fees and costs minus car minus tax, divided by every hour">
+      <span class="op">(</span><span class="t t1">GROSS</span><span class="op">−</span><span class="t t2">FEES &amp; COSTS</span><span class="op">−</span><span class="t t3">CAR</span><span class="op">−</span><span class="t t4">TAX</span><span class="op">)</span><span class="op">÷</span><span class="t t5">EVERY HOUR</span>
+    </div>
+    <p class="lede">Use your last four weeks, not your best week. The result updates as you type. Start from one of the three examples in the video, or clear it and enter your own.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Load an example">
+    <span class="lbl">Example</span>
+    <button type="button" data-preset="marcus" aria-pressed="true">Marcus · rides + delivery</button>
+    <button type="button" data-preset="lena" aria-pressed="false">Lena · Etsy candles</button>
+    <button type="button" data-preset="theo" aria-pressed="false">Theo · Upwork design</button>
+    <button type="button" data-preset="blank" aria-pressed="false">My own numbers</button>
+  </div>
+  <p class="note" id="exampleNote">Showing the Marcus example from the video. Replace any number with yours.</p>
+
+  <div class="grid">
+    <form class="steps" id="calc" autocomplete="off">
+      <section class="step">
+        <h2><span class="num t1">1</span>Gross: what came in</h2>
+        <p class="hint">Everything you were paid in the last four weeks, tips and bonuses included.</p>
+        <div class="fields">
+          <div class="f"><label for="gross">Gross, last 4 weeks</label><div class="in has-pre"><span class="pre">$</span><input id="gross" type="number" min="0" step="any" inputmode="decimal"></div></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num t2">2</span>Fees and direct costs</h2>
+        <p class="hint">Every cut and cost the dashboard doesn't show you.</p>
+        <div class="fields">
+          <div class="f"><label for="cPlatform">Platform fees</label><div class="in has-pre"><span class="pre">$</span><input id="cPlatform" type="number" min="0" step="any" inputmode="decimal"></div><small>Commission, listing, payment and ad fees, Connects</small></div>
+          <div class="f"><label for="cSupplies">Supplies and materials</label><div class="in has-pre"><span class="pre">$</span><input id="cSupplies" type="number" min="0" step="any" inputmode="decimal"></div><small>What goes into the product</small></div>
+          <div class="f"><label for="cShip">Shipping and packaging</label><div class="in has-pre"><span class="pre">$</span><input id="cShip" type="number" min="0" step="any" inputmode="decimal"></div><small>Labels, boxes, tissue, delivery bags</small></div>
+          <div class="f"><label for="cTools">Phone, software, subscriptions</label><div class="in has-pre"><span class="pre">$</span><input id="cTools" type="number" min="0" step="any" inputmode="decimal"></div><small>The share used for the hustle</small></div>
+          <div class="f"><label for="cOther">Insurance add-on and other</label><div class="in has-pre"><span class="pre">$</span><input id="cOther" type="number" min="0" step="any" inputmode="decimal"></div><small>Rideshare insurance, parking, fees</small></div>
+        </div>
+        <div class="sum"><span>Fees and costs</span><b id="sumCosts">$0</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num t3">3</span>The car</h2>
+        <p class="hint">Count every mile or kilometre, the empty ones too. Leave at 0 if you don't drive for it.</p>
+        <div class="fields">
+          <div class="f"><label for="dist">Distance driven</label><div class="in has-suf"><input id="dist" type="number" min="0" step="any" inputmode="decimal"><span class="suf" id="distUnit">mi</span></div></div>
+          <div class="f"><label>Unit</label><div class="seg" role="group" aria-label="Distance unit"><button type="button" id="uMi" aria-pressed="true">Miles</button><button type="button" id="uKm" aria-pressed="false">Kilometres</button></div></div>
+          <div class="f"><label for="perUnit">Cost per <span id="perLbl">mile</span></label><div class="in has-pre has-suf"><span class="pre">$</span><input id="perUnit" type="number" min="0" step="0.01" inputmode="decimal"><span class="suf" id="perSuf">/mi</span></div><small id="perHint">Not sure? Fuel and upkeep run about 40–70¢ a mile (Gridwise).</small></div>
+        </div>
+        <div class="sum"><span>Car cost</span><b id="sumCar">$0</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num t4">4</span>Tax set-aside</h2>
+        <p class="hint">About a quarter of your taxable profit is a safe start. Your real bill depends on your income and where you live.</p>
+        <div class="fields">
+          <div class="f"><label for="country">Where you file</label><select id="country"><option value="us">United States</option><option value="ca">Canada</option><option value="other">Somewhere else</option></select></div>
+          <div class="f"><label for="taxRate">Set-aside rate</label><div class="in has-suf"><input id="taxRate" type="number" min="0" max="60" step="0.1" inputmode="decimal"><span class="suf">%</span></div><small>of taxable profit</small></div>
+        </div>
+        <label class="check" id="irsRow"><input type="checkbox" id="irs"><span>Deduct my driving at the IRS standard rate (76¢ a mile from July 1, 2026; 72.5¢ before). This lowers taxable profit, not your real car cost.</span></label>
+        <p class="callout" id="taxNote"></p>
+        <div class="sum"><span>Taxable profit <span id="taxableTxt"></span></span><b id="sumTax">$0</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num t5">5</span>Every hour</h2>
+        <p class="hint">Write each one down. People who list every step estimate time more realistically (Kruger &amp; Evans, 2004).</p>
+        <div class="fields">
+          <div class="f"><label for="hCore">Core work</label><div class="in has-suf"><input id="hCore" type="number" min="0" step="any" inputmode="decimal"><span class="suf">h</span></div><small>Trips with a job running, making, billed hours</small></div>
+          <div class="f"><label for="hWait">Waiting</label><div class="in has-suf"><input id="hWait" type="number" min="0" step="any" inputmode="decimal"><span class="suf">h</span></div><small>Online with no job, on call</small></div>
+          <div class="f"><label for="hTravel">Getting there and back</label><div class="in has-suf"><input id="hTravel" type="number" min="0" step="any" inputmode="decimal"><span class="suf">h</span></div><small>Driving to the zone, gas, post office, supply runs</small></div>
+          <div class="f"><label for="hAdmin">Admin</label><div class="in has-suf"><input id="hAdmin" type="number" min="0" step="any" inputmode="decimal"><span class="suf">h</span></div><small>Messages, photos, listings, proposals, invoicing, unpaid revisions</small></div>
+          <div class="f"><label for="hOther">Other</label><div class="in has-suf"><input id="hOther" type="number" min="0" step="any" inputmode="decimal"><span class="suf">h</span></div><small>Cleaning, packing, bookkeeping</small></div>
+        </div>
+        <div class="sum"><span>Every hour</span><b id="sumHours">0 h</b></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">✓</span>Compare with three numbers</h2>
+        <p class="hint">Beat all three: keep it. Fall short but you can see a lever: fix it. Fall short of all three with no lever: quit.</p>
+        <div class="fields">
+          <div class="f"><label for="bMin">Minimum wage where you live</label><div class="in has-pre has-suf"><span class="pre">$</span><input id="bMin" type="number" min="0" step="0.01" inputmode="decimal"><span class="suf">/h</span></div><small>US federal $7.25; Ontario $17.95 from Oct 1, 2026. Use your own.</small></div>
+          <div class="f"><label for="bShift">An extra shift at your main job</label><div class="in has-pre has-suf"><span class="pre">$</span><input id="bShift" type="number" min="0" step="0.01" inputmode="decimal"><span class="suf">/h</span></div><small>What an extra shift or overtime pays after tax</small></div>
+          <div class="f"><label for="bSkill">A skill-building option, a year from now</label><div class="in has-pre has-suf"><span class="pre">$</span><input id="bSkill" type="number" min="0" step="0.01" inputmode="decimal"><span class="suf">/h</span></div><small>Your realistic rate once the skill pays</small></div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Your real hourly rate</div>
+        <div class="big" id="rate">$0.00<small>/h</small></div>
+        <div class="vs"><span>The app view: <b id="appRate">$0</b>/h</span><span>You keep <b id="keepAmt">$0</b> of <b id="grossAmt">$0</b></span></div>
+        <div class="verdict" id="verdict">KEEP</div>
+        <p class="vtext" id="vtext"></p>
+      </div>
+
+      <div class="card">
+        <h3>Where the money went</h3>
+        <div class="bar" id="bar" aria-hidden="true"><span id="bCosts" style="background:#2FC2B0"></span><span id="bCar" style="background:#FF8AB6"></span><span id="bTax" style="background:#8FB2FF"></span><span id="bKeep" style="background:var(--yellow)"></span></div>
+        <div class="legend">
+          <div><span><i style="background:#2FC2B0"></i>Fees and costs</span><span id="lCosts">$0</span></div>
+          <div><span><i style="background:#FF8AB6"></i>Car</span><span id="lCar">$0</span></div>
+          <div><span><i style="background:#8FB2FF"></i>Tax set-aside</span><span id="lTax">$0</span></div>
+          <div class="keep"><span><i style="background:var(--yellow)"></i>You keep</span><span id="lKeep">$0</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Against your three numbers</h3>
+        <div class="bench" id="bench"></div>
+      </div>
+
+      <div class="card">
+        <h3>Levers you could pull</h3>
+        <ul class="levers" id="levers"></ul>
+      </div>
+
+      <div class="card">
+        <h3>Share your number</h3>
+        <textarea id="copybox" rows="3" readonly aria-label="Your result as text"></textarea>
+        <div class="actions" style="margin-top:10px">
+          <button type="button" class="btn" id="copyBtn">Copy my result</button>
+          <button type="button" class="btn ghost" id="resetBtn">Clear all</button>
+        </div>
+        <div class="copied" id="copied" role="status"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>From the video "Is Your Side Hustle Worth It? The Math Nobody Does" on The Extraordinary Money Mind. Marcus, Lena and Theo are composite examples built from real 2026 fees and data. Their tax set-aside uses 25.3% of taxable profit (US self-employment tax plus the 12% federal bracket, no state tax).</p>
+    <p>Sources: Gridwise driver data (fuel and upkeep 40–70¢ a mile), IRS 2026 standard mileage rate, Ontario minimum wage (Oct 1, 2026), Kruger &amp; Evans (2004). This calculator is for education only and is not tax or financial advice. Numbers you enter stay in this browser.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var IDS = ['gross','cPlatform','cSupplies','cShip','cTools','cOther','dist','perUnit','taxRate','hCore','hWait','hTravel','hAdmin','hOther','bMin','bShift','bSkill'];
+  var IRS_PER_MILE = 0.76, KM_PER_MI = 1.609344;
+  var PRESETS = {
+    marcus: { label: 'Marcus', v: { gross: 1000, cPlatform: 0, cSupplies: 0, cShip: 0, cTools: 0, cOther: 0, dist: 1200, perUnit: 0.40, taxRate: 25.3, hCore: 42, hWait: 14, hTravel: 4, hAdmin: 0, hOther: 0, bMin: 15, bShift: 25, bSkill: 35 }, unit: 'mi', country: 'us', irs: true },
+    lena:   { label: 'Lena',   v: { gross: 1008, cPlatform: 137.16, cSupplies: 216, cShip: 270, cTools: 0, cOther: 0, dist: 0, perUnit: 0.40, taxRate: 25.3, hCore: 16, hWait: 0, hTravel: 3, hAdmin: 7, hOther: 0, bMin: 15, bShift: 25, bSkill: 35 }, unit: 'mi', country: 'us', irs: false },
+    theo:   { label: 'Theo',   v: { gross: 1000, cPlatform: 109, cSupplies: 0, cShip: 0, cTools: 20, cOther: 0, dist: 0, perUnit: 0.40, taxRate: 25.3, hCore: 20, hWait: 0, hTravel: 0, hAdmin: 7, hOther: 0, bMin: 15, bShift: 25, bSkill: 35 }, unit: 'mi', country: 'us', irs: false },
+    blank:  { label: '', v: { gross: '', cPlatform: '', cSupplies: '', cShip: '', cTools: '', cOther: '', dist: '', perUnit: 0.40, taxRate: 25, hCore: '', hWait: '', hTravel: '', hAdmin: '', hOther: '', bMin: '', bShift: '', bSkill: '' }, unit: 'mi', country: 'us', irs: false }
+  };
+  var NOTES = { marcus: 'Showing the Marcus example from the video. Replace any number with yours.', lena: 'Showing the Lena example from the video. Replace any number with yours.', theo: 'Showing the Theo example from the video. Replace any number with yours.', blank: 'Enter your own last four weeks. Nothing you type leaves this browser.' };
+  var state = { unit: 'mi', preset: 'marcus' };
+
+  function num(id) { var x = parseFloat($(id).value); return isFinite(x) && x > 0 ? x : 0; }
+  function money(x) { var s = Math.abs(x) >= 1000 ? Math.round(x).toLocaleString('en-US') : (Math.round(x * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: x % 1 ? 2 : 0, maximumFractionDigits: 2 }); return (x < 0 ? '−$' : '$') + s.replace('-', ''); }
+  function rateTxt(x) { return (x < 0 ? '−$' : '$') + Math.abs(x).toFixed(2); }
+
+  function compute(o) {
+    // o: gross, costs, dist (in current unit), per, taxRate (%), hours, coreHours, unpaidHours, us, irs, unit
+    var car = o.dist * o.per;
+    var miles = o.unit === 'km' ? o.dist / KM_PER_MI : o.dist;
+    var deduction = (o.us && o.irs) ? miles * IRS_PER_MILE : car;
+    var taxable = Math.max(0, o.gross - o.costs - deduction);
+    var tax = taxable * o.taxRate / 100;
+    var keep = o.gross - o.costs - car - tax;
+    return { car: car, deduction: deduction, taxable: taxable, tax: tax, keep: keep, rate: o.hours > 0 ? keep / o.hours : 0 };
+  }
+
+  function read() {
+    var costs = ['cPlatform','cSupplies','cShip','cTools','cOther'].reduce(function (a, k) { return a + num(k); }, 0);
+    var core = num('hCore'), unpaid = num('hWait') + num('hTravel') + num('hAdmin') + num('hOther');
+    return { gross: num('gross'), costs: costs, dist: num('dist'), per: num('perUnit'), taxRate: num('taxRate'), hours: core + unpaid, coreHours: core, unpaidHours: unpaid,
+             us: $('country').value === 'us', irs: $('irs').checked, unit: state.unit };
+  }
+
+  function update() {
+    var o = read(), r = compute(o);
+    $('sumCosts').textContent = money(o.costs);
+    $('sumCar').textContent = money(r.car);
+    $('taxableTxt').textContent = '(' + money(r.taxable) + ')';
+    $('sumTax').textContent = money(r.tax);
+    $('sumHours').textContent = (Math.round(o.hours * 10) / 10) + ' h';
+    $('rate').innerHTML = rateTxt(r.rate) + '<small>/h</small>';
+    $('appRate').textContent = o.coreHours > 0 ? rateTxt(o.gross / o.coreHours) : '$0';
+    $('keepAmt').textContent = money(r.keep);
+    $('grossAmt').textContent = money(o.gross);
+
+    var tot = Math.max(o.gross, o.costs + r.car + r.tax + Math.max(0, r.keep), 1);
+    var pct = function (x) { return (Math.max(0, x) / tot * 100).toFixed(2) + '%'; };
+    $('bCosts').style.width = pct(o.costs); $('bCar').style.width = pct(r.car); $('bTax').style.width = pct(r.tax); $('bKeep').style.width = pct(r.keep);
+    $('lCosts').textContent = money(o.costs); $('lCar').textContent = money(r.car); $('lTax').textContent = money(r.tax); $('lKeep').textContent = money(r.keep);
+
+    $('irsRow').hidden = !o.us;
+    var c = $('country').value;
+    $('taxNote').textContent = c === 'us' ? 'US: self-employment tax is 15.3% on 92.35% of net profit of $400 or more, plus income tax. 25.3% matches self-employment tax plus the 12% bracket.'
+      : c === 'ca' ? 'Canada: you pay both halves of CPP (11.9% in 2026) plus income tax. Ride-share drivers must register for GST/HST from their first fare.'
+      : 'Use the rate you would owe on extra self-employed income where you file.';
+
+    var B = [['Minimum wage where you live', num('bMin')], ['An extra shift at your job', num('bShift')], ['A skill-building option', num('bSkill')]].filter(function (b) { return b[1] > 0; });
+    $('bench').innerHTML = B.length ? B.map(function (b) { var ok = r.rate >= b[1]; return '<div class="brow"><span>' + b[0] + '</span><span>' + rateTxt(b[1]) + '</span><span class="pill ' + (ok ? 'ok' : 'no') + '">' + (ok ? 'BEATS' : 'SHORT') + '</span></div>'; }).join('')
+      : '<p class="note">Add your three numbers in the last step to get a verdict.</p>';
+
+    // Levers
+    var L = [];
+    var base = o;
+    if (o.unpaidHours > 0) { var a = Object.assign({}, base, { hours: base.coreHours + base.unpaidHours / 2 }); L.push(['Cut waiting, travel and admin hours in half', compute(a).rate]); }
+    if (o.gross > 0) { var b = Object.assign({}, base, { gross: base.gross * 1.10 }); L.push(['Earn 10% more for the same work (prices, peak hours)', compute(b).rate]); }
+    if (o.dist > 0) { var d = Object.assign({}, base, { dist: base.dist * 0.70 }); L.push(['Drive 30% fewer miles (fewer empty miles)', compute(d).rate]); }
+    if (L.length > 1) { var all = Object.assign({}, base, { hours: base.coreHours + base.unpaidHours / 2, gross: base.gross * 1.10, dist: base.dist * 0.70 }); L.push(['All of the above together', compute(all).rate]); }
+    $('levers').innerHTML = L.length ? L.map(function (l) { return '<li><span>' + l[0] + '</span><b>' + rateTxt(l[1]) + '/h</b></li>'; }).join('') : '<li><span class="note">Enter your numbers to see what each lever is worth.</span></li>';
+
+    // Verdict
+    var v = $('verdict'), t = $('vtext'), verdict = '';
+    var best = L.reduce(function (m, l) { return Math.max(m, l[1]); }, r.rate);
+    if (!B.length || o.hours === 0) { v.className = 'verdict fix'; v.textContent = 'ADD YOUR NUMBERS'; t.textContent = 'Fill in your hours and your three comparison rates to get keep, fix or quit.'; verdict = ''; }
+    else {
+      var beatsAll = B.every(function (b) { return r.rate >= b[1]; });
+      var beatsNone = B.every(function (b) { return r.rate < b[1]; });
+      var lowest = Math.min.apply(null, B.map(function (b) { return b[1]; }));
+      if (beatsAll) { verdict = 'KEEP'; v.className = 'verdict keep'; t.textContent = 'It beats all three. Keep it, and recheck every few months.'; }
+      else if (beatsNone && best < lowest) { verdict = 'QUIT'; v.className = 'verdict quit'; t.textContent = 'Short of all three, and none of these levers closes the gap. Give those hours to something that pays you back.'; }
+      else { verdict = 'FIX'; v.className = 'verdict fix'; t.textContent = 'It falls short of at least one number, but there is a lever. Pull the one worth the most below.'; }
+      v.textContent = verdict;
+    }
+
+    $('copybox').value = 'My side hustle\'s real hourly rate: ' + rateTxt(r.rate) + '/h' + (o.coreHours > 0 ? ' (the app view: ' + rateTxt(o.gross / o.coreHours) + '/h)' : '') + '. I keep ' + money(r.keep) + ' of ' + money(o.gross) + ' over ' + (Math.round(o.hours * 10) / 10) + ' hours.' + (verdict ? ' Verdict: ' + verdict + '.' : '');
+    save();
+  }
+
+  function setUnit(u, convert) {
+    if (u === state.unit) return;
+    if (convert) {
+      var d = parseFloat($('dist').value), p = parseFloat($('perUnit').value);
+      if (isFinite(d)) $('dist').value = Math.round((u === 'km' ? d * KM_PER_MI : d / KM_PER_MI) * 10) / 10;
+      if (isFinite(p)) $('perUnit').value = Math.round((u === 'km' ? p / KM_PER_MI : p * KM_PER_MI) * 100) / 100;
+    }
+    state.unit = u;
+    $('uMi').setAttribute('aria-pressed', u === 'mi'); $('uKm').setAttribute('aria-pressed', u === 'km');
+    $('distUnit').textContent = u; $('perSuf').textContent = '/' + u; $('perLbl').textContent = u === 'mi' ? 'mile' : 'kilometre';
+    $('perHint').textContent = u === 'mi' ? 'Not sure? Fuel and upkeep run about 40–70¢ a mile (Gridwise).' : 'Not sure? Fuel and upkeep run about 25–45¢ a kilometre (Gridwise, converted).';
+  }
+
+  function load(name) {
+    var p = PRESETS[name]; state.preset = name;
+    IDS.forEach(function (k) { $(k).value = p.v[k]; });
+    state.unit = 'mi'; setUnit(p.unit, false); $('uMi').setAttribute('aria-pressed', true); $('uKm').setAttribute('aria-pressed', false);
+    $('country').value = p.country; $('irs').checked = p.irs;
+    document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === name); });
+    $('exampleNote').textContent = NOTES[name];
+    update();
+  }
+
+  function save() {
+    try { var d = { preset: state.preset, unit: state.unit, country: $('country').value, irs: $('irs').checked, v: {} }; IDS.forEach(function (k) { d.v[k] = $(k).value; }); localStorage.setItem('rhr-v1', JSON.stringify(d)); } catch (e) {}
+  }
+  function restore() {
+    try {
+      var d = JSON.parse(localStorage.getItem('rhr-v1') || 'null'); if (!d || !d.v) return false;
+      IDS.forEach(function (k) { if (k in d.v) $(k).value = d.v[k]; });
+      state.unit = 'mi'; setUnit(d.unit === 'km' ? 'km' : 'mi', false);
+      $('country').value = d.country || 'us'; $('irs').checked = !!d.irs; state.preset = d.preset || 'blank';
+      document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === state.preset); });
+      $('exampleNote').textContent = NOTES[state.preset] || NOTES.blank;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { load(b.dataset.preset); }); });
+  $('calc').addEventListener('input', function (e) {
+    if (state.preset !== 'blank' && e.target.id) { state.preset = 'blank'; document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === 'blank'); }); $('exampleNote').textContent = 'Your own numbers. Nothing you type leaves this browser.'; }
+    update();
+  });
+  $('calc').addEventListener('submit', function (e) { e.preventDefault(); });
+  $('country').addEventListener('change', update);
+  $('uMi').addEventListener('click', function () { setUnit('mi', true); update(); });
+  $('uKm').addEventListener('click', function () { setUnit('km', true); update(); });
+  $('resetBtn').addEventListener('click', function () { load('blank'); });
+  $('copyBtn').addEventListener('click', function () {
+    var txt = $('copybox').value, done = function () { $('copied').textContent = 'Copied. Paste it in the comments.'; };
+    try { navigator.clipboard.writeText(txt).then(done, function () { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }); }
+    catch (e) { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }
+  });
+
+  if (!restore()) load('marcus'); else update();
+})();
+</script>
+</body>
+</html>
