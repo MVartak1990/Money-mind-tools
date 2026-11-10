@@ -126,8 +126,8 @@ footer a { color: inherit }
       </section>
 
       <section class="step">
-        <h2><span class="num" style="background:#FF8AB6">4</span>Make your own card expire</h2>
-        <p class="hint">Put every subscription on one card (some banks offer virtual cards with an end date you choose). Then every 6 months, re-choose each one or cancel it. Your next review: <b id="review"></b>.</p>
+        <h2><span class="num" style="background:#FF8AB6">3</span>Rotate, then make your own card expire</h2>
+        <p class="hint">Rotate, don't stack: keep one streaming service at a time and switch when you've watched what you wanted. Then put every subscription on one card (some banks offer virtual cards with an end date you choose). Then every 6 months, re-choose each one or cancel it. Your next review: <b id="review"></b>.</p>
       </section>
     </div>
 
@@ -179,7 +179,7 @@ footer a { color: inherit }
       '<div><span class="mlab">Price</span><input aria-label="Price" class="p" type="number" inputmode="decimal" min="0" step="0.01" value="' + r[1] + '"></div>' +
       '<div><span class="mlab">Billed</span><select aria-label="Billed" class="c"><option value="m">Monthly</option><option value="y">Yearly</option></select></div>' +
       '<div><span class="mlab">Uses (30 days)</span><input aria-label="Uses in the last 30 days" class="u" type="number" inputmode="numeric" min="0" step="1" value="' + r[3] + '"></div>' +
-      '<div><span class="mlab">Pay-as-you-go</span><input aria-label="Pay-as-you-go price per use (optional)" class="g" type="number" inputmode="decimal" min="0" step="0.01" value="' + r[4] + '" placeholder="optional"></div>' +
+      '<div><span class="mlab">Pay-as-you-go</span><input aria-label="Pay-as-you-go price per use (optional)" class="g" type="number" inputmode="decimal" min="0" step="0.01" value="' + r[4] + '" placeholder="e.g. 15"></div>' +
       '<button type="button" class="x" aria-label="Remove">×</button><div class="v"></div>';
     d.querySelector('.c').value = r[2] === 'y' ? 'y' : 'm';
     d.querySelector('.x').addEventListener('click', function () { d.remove(); calc(); });
