@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subscription Audit Calculator · The Extraordinary Money Mind</title>
+<meta name="description" content="Free calculator from The Extraordinary Money Mind: find your real subscription number, your price per use for every subscription, and what keeping, rotating or cancelling would save. Any currency, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Subscription Audit Calculator">
+<meta property="og:description" content="Your guess vs your real subscription total, price per use for every line, and a keep / rotate / cancel verdict. Any currency.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 4 audit steps, then the guess + subscription list (left) and a sticky result card (right); one column on phones, list rows become cards. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --orange: #F2862E;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #8FB2FF } .q4 { background: #FF8AB6 }
+.lede { max-width: 70ch; color: rgba(255,246,229,.84); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 960px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="number"] { -moz-appearance: textfield }
+.list { display: grid; gap: 8px }
+.lhead, .item { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, .8fr) minmax(0, 1fr) 34px; gap: 8px; align-items: center }
+.lhead { font: 800 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-inline: 2px }
+.item .x { padding: 0; width: 34px; height: 34px; border-radius: 9px; font-size: 16px; line-height: 1 }
+.item .v { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); margin-top: -2px }
+.tag { font: 900 11.5px/1 var(--display); letter-spacing: .1em; padding: 6px 9px; border-radius: 7px; color: #fff }
+.t-KEEP { background: var(--teal) } .t-ROTATE { background: var(--blue) } .t-CANCEL { background: var(--red) } .t-SWITCH { background: var(--orange) }
+.mlab { display: none }
+@media (max-width: 640px) {
+  .lhead { display: none }
+  .item { grid-template-columns: 1fr 1fr; background: var(--field); border: 1px solid var(--line); border-radius: 12px; padding: 10px }
+  .item .nm { grid-column: 1 / -1 }
+  .item .x { position: absolute; right: 8px; top: 8px }
+  .item { position: relative }
+  .item .nm input { padding-right: 46px }
+  .mlab { display: block; font: 700 11px/1.2 var(--display); color: var(--muted); margin-bottom: 3px }
+}
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); min-width: 0 }
+.headline { background: #14213D; color: var(--cream); border: 0; display: grid; gap: 10px }
+.big { font: 900 clamp(30px, 6vw, 40px)/1.05 var(--display); letter-spacing: -.02em }
+.vline { font: 700 13.5px/1.45 var(--display); color: rgba(255,246,229,.85) }
+.vline b { color: var(--cream) }
+.gap { display: inline-block; background: var(--red); color: #fff; font: 900 13px/1 var(--display); letter-spacing: .06em; padding: 8px 11px; border-radius: 8px; width: max-content; max-width: 100% }
+.card h3 { margin: 0 0 10px; font: 800 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.rows { display: grid; gap: 8px }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13.5px }
+.row b { text-align: right }
+.save { background: var(--teal); color: #fff; border: 0 }
+.save .big { color: #fff }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Extraordinary Money Mind · free calculator</div>
+  <h1>Subscription Audit Calculator</h1>
+  <div class="qs"><span class="q1">1 · Find your real number</span><span class="q2">2 · Price per use</span><span class="q3">3 · Rotate, don't stack</span><span class="q4">4 · Make your own card expire</span></div>
+  <p class="lede">Most people guess they pay about $86 a month for subscriptions; when they count, it's about $219. Write down your guess first, then list everything from your last 3 months of statements, your phone's subscription list and any app store or PayPal account.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load</span>
+    <button type="button" id="pLeah" aria-pressed="false">Leah (video example)</button>
+    <button type="button" id="pBlank" aria-pressed="false">Blank list</button>
+    <span class="note">Everything stays in your browser. No sign-up, no tracking.</span>
+  </div>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">1</span>Your guess first</h2>
+        <p class="hint">Before you count: what do you think you pay for subscriptions each month? Give yourself 10 seconds.</p>
+        <div class="fields">
+          <div class="f"><label for="cur">Currency</label><select id="cur"></select></div>
+          <div class="f"><label for="guess">My guess, per month</label><input id="guess" type="number" inputmode="decimal" min="0" step="1"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#2FC2B0">2</span>Your real list</h2>
+        <p class="hint">Uses = times you actually used it in the last 30 days. "Pay-as-you-go" is optional: what one use would cost without the subscription (a gym drop-in, a single rental).</p>
+        <div class="list" id="list">
+          <div class="lhead"><span>Subscription</span><span>Price</span><span>Billed</span><span>Uses (30 d)</span><span>Pay-as-you-go</span><span></span></div>
+        </div>
+        <div><button type="button" id="add">+ Add a subscription</button></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#FF8AB6">4</span>Make your own card expire</h2>
+        <p class="hint">Put every subscription on one card (some banks offer virtual cards with an end date you choose). Then every 6 months, re-choose each one or cancel it. Your next review: <b id="review"></b>.</p>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Your real number</div>
+        <div class="big" id="total">—</div>
+        <div class="vline" id="totalLine"></div>
+        <div class="gap" id="gapTag"></div>
+      </div>
+      <div class="card">
+        <h3>Price per use · verdicts</h3>
+        <div class="rows" id="verdicts"></div>
+      </div>
+      <div class="card save">
+        <div class="kicker" style="color:#fff">If you follow the verdicts</div>
+        <div class="big" id="saveM">—</div>
+        <div class="vline" id="saveY" style="color:#fff"></div>
+      </div>
+      <p class="note">How verdicts work: not used in 30 days → <b>cancel</b>. Cost per use above your pay-as-you-go price → <b>switch</b> to paying per use. Used once or twice → <b>rotate</b> (assumes you keep it 1 month in 3). Otherwise <b>keep</b>. Yearly prices are divided by 12.</p>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p>From the video “Why Is Everything a Subscription?” by The Extraordinary Money Mind. Sources in the video description: C+R Research (2022), Einav, Klopack &amp; Mahoney (NBER 2023), DellaVigna &amp; Malmendier (AER 2006). Leah is an example; prices are illustrative. Education only, not financial advice. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var CUR = [['USD','en-US'],['CAD','en-CA'],['GBP','en-GB'],['EUR','de-DE'],['INR','en-IN'],['AUD','en-AU'],['NZD','en-NZ'],['SGD','en-SG'],['ZAR','en-ZA'],['PHP','en-PH']];
+  var LEAH = {cur: 'USD', guess: 90, rows: [
+    ['Video streaming A', 19.99, 'm', 14, ''], ['Video streaming B', 18.99, 'm', 2, ''], ['Video streaming C', 11.99, 'm', 0, ''],
+    ['Music', 12.99, 'm', 26, ''], ['Cloud storage', 2.99, 'm', 30, ''], ['Gym', 69.99, 'm', 3, 15],
+    ['Meal kit', 59.99, 'm', 4, ''], ['AI assistant', 20, 'm', 9, ''], ['News app', 4.99, 'm', 0, ''],
+    ['Game pass', 9.99, 'm', 1, ''], ['Fitness app (old trial)', 14.99, 'm', 0, '']]};
+  var KEY = 'sub-audit-v1';
+  var $ = function (id) { return document.getElementById(id); };
+  var list = $('list'), cur = $('cur');
+  CUR.forEach(function (c) { var o = document.createElement('option'); o.value = c[0]; o.textContent = c[0]; cur.appendChild(o); });
+  function loc() { for (var i = 0; i < CUR.length; i++) if (CUR[i][0] === cur.value) return CUR[i][1]; return 'en-US'; }
+  function fmt(n, d) { try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, maximumFractionDigits: d == null ? 2 : d, minimumFractionDigits: d == null ? 2 : d}).format(n); } catch (e) { return n.toFixed(2); } }
+  function num(v) { var x = parseFloat(v); return isFinite(x) && x >= 0 ? x : 0; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+  function addRow(r) {
+    r = r || ['', '', 'm', '', ''];
+    var d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = '<div class="nm"><span class="mlab">Subscription</span><input aria-label="Subscription name" class="n" type="text" value="' + esc(r[0]) + '" placeholder="e.g. Music"></div>' +
+      '<div><span class="mlab">Price</span><input aria-label="Price" class="p" type="number" inputmode="decimal" min="0" step="0.01" value="' + r[1] + '"></div>' +
+      '<div><span class="mlab">Billed</span><select aria-label="Billed" class="c"><option value="m">Monthly</option><option value="y">Yearly</option></select></div>' +
+      '<div><span class="mlab">Uses (30 days)</span><input aria-label="Uses in the last 30 days" class="u" type="number" inputmode="numeric" min="0" step="1" value="' + r[3] + '"></div>' +
+      '<div><span class="mlab">Pay-as-you-go</span><input aria-label="Pay-as-you-go price per use (optional)" class="g" type="number" inputmode="decimal" min="0" step="0.01" value="' + r[4] + '" placeholder="optional"></div>' +
+      '<button type="button" class="x" aria-label="Remove">×</button><div class="v"></div>';
+    d.querySelector('.c').value = r[2] === 'y' ? 'y' : 'm';
+    d.querySelector('.x').addEventListener('click', function () { d.remove(); calc(); });
+    d.addEventListener('input', calc); d.addEventListener('change', calc);
+    list.appendChild(d);
+  }
+  function verdict(pm, u, g) {
+    if (pm <= 0) return {v: '', s: 0};
+    if (u === 0) return {v: 'CANCEL', s: pm};
+    if (g > 0 && pm / u > g) return {v: 'SWITCH', s: Math.max(0, pm - u * g)};
+    if (u <= 2) return {v: 'ROTATE', s: pm * 2 / 3};
+    return {v: 'KEEP', s: 0};
+  }
+  function state() {
+    return {cur: cur.value, guess: $('guess').value, rows: Array.prototype.map.call(list.querySelectorAll('.item'), function (d) {
+      return [d.querySelector('.n').value, d.querySelector('.p').value, d.querySelector('.c').value, d.querySelector('.u').value, d.querySelector('.g').value]; })};
+  }
+  function load(s) {
+    cur.value = s.cur || 'USD'; $('guess').value = s.guess == null ? '' : s.guess;
+    Array.prototype.forEach.call(list.querySelectorAll('.item'), function (d) { d.remove(); });
+    (s.rows && s.rows.length ? s.rows : [['', '', 'm', '', '']]).forEach(addRow); calc();
+  }
+  function calc() {
+    var tot = 0, save = 0, out = [], items = list.querySelectorAll('.item');
+    Array.prototype.forEach.call(items, function (d) {
+      var p = num(d.querySelector('.p').value), y = d.querySelector('.c').value === 'y', u = Math.round(num(d.querySelector('.u').value)), g = num(d.querySelector('.g').value);
+      var pm = y ? p / 12 : p; tot += pm; var r = verdict(pm, u, g); save += r.s;
+      var nm = d.querySelector('.n').value || 'Unnamed';
+      var cpu = u > 0 ? fmt(pm / u) + ' per use' : 'not used in 30 days';
+      d.querySelector('.v').innerHTML = pm > 0 ? '<span class="tag t-' + r.v + '">' + r.v + '</span><span>' + (y ? fmt(pm) + '/month · ' : '') + cpu + (r.s > 0 ? ' · saves ' + fmt(r.s) + '/month' : '') + '</span>' : '';
+      if (pm > 0) out.push('<div class="row"><span>' + esc(nm) + ' <span class="tag t-' + r.v + '" style="margin-left:6px">' + r.v + '</span></span><b>' + (u > 0 ? fmt(pm / u) : '—') + '</b></div>');
+    });
+    var guess = num($('guess').value);
+    $('total').textContent = fmt(tot) + ' / month';
+    $('totalLine').innerHTML = '<b>' + fmt(tot * 12, 0) + '</b> a year across <b>' + out.length + '</b> subscription' + (out.length === 1 ? '' : 's') + '.';
+    var gap = tot - guess;
+    $('gapTag').textContent = $('guess').value === '' ? 'ADD YOUR GUESS TO SEE THE GAP' : (gap >= 0 ? 'YOUR GUESS WAS OFF BY ' + fmt(gap, 0) + '/MONTH' : 'YOU OVERESTIMATED BY ' + fmt(-gap, 0) + '/MONTH');
+    $('verdicts').innerHTML = out.length ? out.join('') : '<p class="note">Add your subscriptions to see each one’s price per use.</p>';
+    $('saveM').textContent = '≈ ' + fmt(save, 0) + ' / month';
+    $('saveY').textContent = '≈ ' + fmt(save * 12, 0) + ' a year back, keeping everything you actually use.';
+    var dt = new Date(); dt.setMonth(dt.getMonth() + 6);
+    try { $('review').textContent = dt.toLocaleDateString(loc(), {day: 'numeric', month: 'long', year: 'numeric'}); } catch (e) { $('review').textContent = dt.toDateString(); }
+    var st = state(); var pres = JSON.stringify(st.rows) === JSON.stringify(LEAH.rows.map(function (r) { return r.map(String); })) && String(st.guess) === '90';
+    $('pLeah').setAttribute('aria-pressed', pres ? 'true' : 'false'); $('pBlank').setAttribute('aria-pressed', 'false');
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+  }
+  $('add').addEventListener('click', function () { addRow(); calc(); var ins = list.querySelectorAll('.item .n'); ins[ins.length - 1].focus(); });
+  $('pLeah').addEventListener('click', function () { load(LEAH); });
+  $('pBlank').addEventListener('click', function () { load({cur: cur.value, guess: '', rows: [['', '', 'm', '', ''], ['', '', 'm', '', ''], ['', '', 'm', '', '']]}); $('pBlank').setAttribute('aria-pressed', 'true'); });
+  $('guess').addEventListener('input', calc); cur.addEventListener('change', calc);
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && saved.rows ? saved : LEAH);
+})();
+</script>
+</body>
+</html>

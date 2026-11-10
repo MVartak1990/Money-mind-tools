@@ -2,6 +2,7 @@
 
 Free calculators from **The Extraordinary Money Mind** YouTube channel, hosted on GitHub Pages:
 
+- Subscription Audit (your real subscription number, price per use, keep / rotate / cancel, any currency): `/subscription-audit/`
 - Invest Now or Wait (lump sum vs dollar-cost averaging, any currency): `/invest-now-or-wait/`
 - Rent vs Buy (the Rent-or-Buy Test): `/rent-vs-buy/`
 - The Next Door Test (Millionaire Next Door net worth by age): `/next-door-test/`
