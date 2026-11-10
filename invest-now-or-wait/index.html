@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Invest Now or Wait Calculator · The Extraordinary Money Mind</title>
+<meta name="description" content="Free calculator from The Extraordinary Money Mind: should you invest a lump sum now or spread it out? See what spreading it costs, what a 20% drop would look like, and which of the 3 Invest-Now questions decides it. Any currency.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Invest Now or Wait Calculator">
+<meta property="og:description" content="Lump sum vs dollar-cost averaging on your own numbers, in any currency: the cost of spreading it out, a 20% drop test, and the 3-question Invest-Now Rule.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the three questions, then inputs grouped by question (left) and a sticky verdict, drop test and schedule (right); one column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6;
+  --field: #FFFDF8; --band: #14213D; --band-ink: #FFF6E5; --lump: #1B998B; --spread: #D99A00; --loss: #E4572E; --grid: #EFE6D2;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A;
+  --field: #0F1A33; --band: #0A1226; --band-ink: #FFF6E5; --lump: #3CC3B2; --spread: #FFC93C; --loss: #FF7A55; --grid: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: var(--band); color: var(--band-ink) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #FF8AB6 }
+.lede { max-width: 68ch; color: color-mix(in srgb, var(--band-ink) 82%, transparent); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+.presets button, .seg button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+.presets button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 410px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow) }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label, .f .lab { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+.in { position: relative; display: flex; align-items: center }
+.in .pre, .in .suf { position: absolute; color: var(--muted); font: 700 14px/1 var(--display); pointer-events: none }
+.in .pre { left: 11px } .in .suf { right: 11px }
+input[type="number"], select { width: 100%; font: 700 16px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px; min-width: 0; -moz-appearance: textfield }
+.in.has-pre input { padding-left: 40px } .in.has-suf input { padding-right: 58px }
+input[type="range"] { width: 100%; accent-color: var(--teal) }
+.seg { display: flex; flex-wrap: wrap; gap: 6px }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 14px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); min-width: 0 }
+.headline { background: var(--navy); color: var(--cream); border: 0; display: grid; gap: 10px }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .headline { background: #0A1226 } }
+.big { font: 900 clamp(28px, 6vw, 38px)/1.08 var(--display); letter-spacing: -.02em }
+.vline { font: 700 13.5px/1.45 var(--display); color: color-mix(in srgb, var(--cream) 85%, transparent) }
+.vline b { color: var(--cream) }
+.verdict { display: inline-flex; align-items: center; font: 900 14px/1 var(--display); letter-spacing: .12em; padding: 9px 14px; border-radius: 9px; width: max-content; max-width: 100%; color: var(--navy); white-space: normal }
+.verdict.now { background: #3CC3B2 } .verdict.sched { background: var(--yellow) } .verdict.safe { background: #FF9A6B }
+.card h3 { margin: 0 0 10px; font: 800 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted) }
+.rows { display: grid; gap: 8px }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13.5px }
+.row b { text-align: right }
+.bars { display: grid; gap: 10px; margin-top: 4px }
+.bar { display: grid; gap: 4px; font-size: 12.5px }
+.bar .track { height: 14px; border-radius: 7px; background: var(--grid); overflow: hidden }
+.bar .fill { height: 100%; border-radius: 7px }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+th, td { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--line) }
+th { font: 800 11px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+td:last-child, th:last-child { text-align: right }
+.btn { font: 800 13px/1 var(--display); padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer }
+.btn.ghost { background: transparent; color: var(--ink) }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
+#copybox { width: 100%; font: 600 13px/1.4 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; resize: none }
+.copied { font-size: 12.5px; color: var(--lump); min-height: 1em }
+.ref { border-left: 4px solid var(--yellow); padding: 8px 12px; background: color-mix(in srgb, var(--yellow) 14%, transparent); border-radius: 8px; font-size: 13px }
+footer { border-top: 1px solid var(--line) }
+footer .wrap { padding-block: 18px 30px; display: grid; gap: 8px; color: var(--muted); font-size: 12.5px }
+footer p { margin: 0; max-width: 92ch }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div class="kicker">The Extraordinary Money Mind · Calculator</div>
+    <h1>Invest now or wait? Run the Invest-Now Rule on your money</h1>
+    <div class="qs"><span class="q1">1 · IS IT LONG-TERM MONEY?</span><span class="q2">2 · DEFAULT: ALL AT ONCE</span><span class="q3">3 · THE REGRET TEST</span></div>
+    <p class="lede">You have a lump sum in cash: a bonus, an inheritance, a house sale. Compare investing it all today with spreading it over a few months, in any currency. Results update as you type.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Load an example">
+    <span class="lbl">Example</span>
+    <button type="button" data-preset="priya" aria-pressed="true">Priya · $25,000 bonus</button>
+    <button type="button" data-preset="vanguard" aria-pressed="false">Vanguard's $100,000 test</button>
+    <button type="button" data-preset="blank" aria-pressed="false">My own numbers</button>
+  </div>
+  <p class="note" id="exampleNote"></p>
+
+  <div class="grid">
+    <form class="steps" id="calc" autocomplete="off">
+      <section class="step">
+        <h2><span class="num q1">1</span>Your money and when you need it</h2>
+        <p class="hint">Money you need within about five years shouldn't be in stocks at all, whatever the market does.</p>
+        <div class="fields">
+          <div class="f"><label for="cur">Currency</label><select id="cur">
+            <option value="USD">US dollar ($)</option><option value="CAD">Canadian dollar (C$)</option><option value="GBP">British pound (£)</option><option value="EUR">Euro (€)</option><option value="AUD">Australian dollar (A$)</option><option value="INR">Indian rupee (₹)</option><option value="JPY">Japanese yen (¥)</option><option value="NZD">New Zealand dollar (NZ$)</option><option value="SGD">Singapore dollar (S$)</option><option value="ZAR">South African rand (R)</option>
+          </select><small>The math is the same in any currency.</small></div>
+          <div class="f"><label for="amt">Lump sum sitting in cash</label><div class="in has-pre"><span class="pre" id="sym">$</span><input id="amt" type="number" min="0" step="100" inputmode="decimal"></div></div>
+          <div class="f"><label for="yrs">When will you need it?</label><div class="in has-suf"><input id="yrs" type="number" min="0" max="60" step="1" inputmode="numeric"><span class="suf">years</span></div></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num q2">2</span>All at once, or spread out?</h2>
+        <p class="hint">1 month = all at once today. Vanguard tested splits of 3 to 6 equal parts, one a month.</p>
+        <div class="fields">
+          <div class="f"><label for="months">Spread over</label><div class="in has-suf"><input id="months" type="number" min="1" max="24" step="1" inputmode="numeric"><span class="suf">months</span></div></div>
+          <div class="f"><label for="ret">Stocks return (your guess)</label><div class="in has-suf"><input id="ret" type="number" min="-20" max="20" step="0.1" inputmode="decimal"><span class="suf">%/yr</span></div><small>A long-run guess, not a promise</small></div>
+          <div class="f"><label for="cash">Cash or money-market rate</label><div class="in has-suf"><input id="cash" type="number" min="0" max="20" step="0.1" inputmode="decimal"><span class="suf">%/yr</span></div><small>What the waiting money earns</small></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num q3">3</span>The regret test</h2>
+        <p class="hint">Imagine the market falls the amount below next month. Be honest: would you sell?</p>
+        <div class="fields">
+          <div class="f"><label for="drop">Drop next month</label><div class="in has-suf"><input id="drop" type="number" min="1" max="80" step="1" inputmode="numeric"><span class="suf">%</span></div></div>
+          <div class="f"><span class="lab" id="sellLab">Would you sell?</span><div class="seg" role="group" aria-labelledby="sellLab">
+            <button type="button" data-sell="no" aria-pressed="true">No, I'd hold</button><button type="button" data-sell="unsure" aria-pressed="false">Not sure</button><button type="button" data-sell="yes" aria-pressed="false">Yes, I'd sell</button>
+          </div></div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Your answer</div>
+        <div class="verdict now" id="verdict">ALL AT ONCE</div>
+        <div class="big" id="headline">–</div>
+        <div class="vline" id="vtext"></div>
+      </div>
+
+      <div class="card">
+        <h3>What spreading it out likely costs</h3>
+        <div class="rows" id="cost"></div>
+        <div class="bars" id="bars"></div>
+        <p class="note" id="hit" style="margin-top:10px"></p>
+      </div>
+
+      <div class="card">
+        <h3>The drop test, next month</h3>
+        <div class="rows" id="dropRows"></div>
+        <p class="note" style="margin-top:8px">A drop on paper only becomes a real loss if you sell. That's what question 3 is about.</p>
+      </div>
+
+      <div class="card">
+        <h3 id="schedTitle">Your schedule</h3>
+        <table><thead><tr><th>#</th><th>Date</th><th>Invest</th></tr></thead><tbody id="sched"></tbody></table>
+        <p class="note" style="margin-top:8px">Set every date today and make the transfers automatic. A rule only works if it decides for you.</p>
+      </div>
+
+      <div class="card">
+        <h3>Share your result</h3>
+        <textarea id="copybox" rows="3" readonly aria-label="Your result as text"></textarea>
+        <div class="actions">
+          <button type="button" class="btn" id="copyBtn">Copy my result</button>
+          <button type="button" class="btn ghost" id="resetBtn">Clear all</button>
+        </div>
+        <div class="copied" id="copied" role="status"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>From the video "Should You Invest Now or Wait? (Lump Sum vs Dollar-Cost Averaging)" on The Extraordinary Money Mind. Priya is an example. "Likely cost" is the expected difference after one year if stocks earn your return guess and the waiting money earns your cash rate, with equal parts invested one month apart starting today. Real years vary widely: spreading it out wins about one year in three.</p>
+    <p>Sources: Vanguard, Finlay &amp; Zorn, "Cost averaging: Invest now or temporarily hold your cash?" (Feb 2023): lump sum beat a 3-month split 68% of the time (MSCI World, 1976–2022), 61.6–73.7% by market and split length; median one-year values on $100,000 of $111,940 vs $109,580. Schwab Center for Financial Research, "Does Market Timing Work?" (2025). Meir Statman, "A Behavioral Framework for Dollar-Cost Averaging" (Journal of Portfolio Management, 1995). For education only, not financial advice. Numbers you enter stay in this browser.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var IDS = ['cur', 'amt', 'yrs', 'months', 'ret', 'cash', 'drop'];
+  var SYM = { USD: '$', CAD: 'C$', GBP: '£', EUR: '€', AUD: 'A$', INR: '₹', JPY: '¥', NZD: 'NZ$', SGD: 'S$', ZAR: 'R' };
+  var LOC = { USD: 'en-US', CAD: 'en-CA', GBP: 'en-GB', EUR: 'en-IE', AUD: 'en-AU', INR: 'en-IN', JPY: 'ja-JP', NZD: 'en-NZ', SGD: 'en-SG', ZAR: 'en-ZA' };
+  // Vanguard (2023) Figure 6, MSCI World (USD) hit ratios: lump sum beat an n-month split after one year
+  var HIT = { 3: 67.7, 4: 69.7, 5: 71.7, 6: 72.6 };
+  var PRESETS = {
+    priya: { v: { cur: 'USD', amt: 25000, yrs: 10, months: 1, ret: 7, cash: 4, drop: 20 }, sell: 'no', note: "Priya's example from the video: a $25,000 bonus she has been holding since the summer. A 20% drop next month is $5,000 on paper. Replace any number with yours." },
+    vanguard: { v: { cur: 'USD', amt: 100000, yrs: 10, months: 3, ret: 7, cash: 0, drop: 20 }, sell: 'no', note: "Vanguard's test from the video: $100,000, all at once vs three equal parts a month apart (no interest on the waiting cash). Historically the typical one-year results were $111,940 vs $109,580." },
+    blank: { v: { cur: 'USD', amt: '', yrs: 10, months: 1, ret: 7, cash: 4, drop: 20 }, sell: 'no', note: 'Enter your own numbers. Nothing you type leaves this browser.' }
+  };
+  var state = { preset: 'priya', sell: 'no' };
+  function v(id) { var x = parseFloat($(id).value); return isFinite(x) ? x : 0; }
+  function fmt(x, cur) {
+    try { return new Intl.NumberFormat(LOC[cur] || 'en-US', { style: 'currency', currency: cur, maximumFractionDigits: 0, minimumFractionDigits: 0 }).format(Math.round(x)); }
+    catch (e) { return (SYM[cur] || '$') + Math.round(x).toLocaleString('en-US'); }
+  }
+  // Expected value after 12 months: n equal parts, part k invested at month k (k = 0..n-1); uninvested parts earn cash.
+  function after12(A, n, r, c) {
+    var rm = Math.pow(1 + r / 100, 1 / 12) - 1, cm = Math.pow(1 + c / 100, 1 / 12) - 1, tot = 0, H = Math.max(12, n);
+    for (var k = 0; k < n; k++) tot += (A / n) * Math.pow(1 + cm, k) * Math.pow(1 + rm, H - k);
+    return tot;
+  }
+  function addMonths(d, m) { var x = new Date(d.getFullYear(), d.getMonth() + m, d.getDate()); if (x.getDate() !== d.getDate()) x.setDate(0); return x; }
+  function update() {
+    var o = {}; IDS.forEach(function (k) { o[k] = k === 'cur' ? $(k).value : v(k); });
+    var cur = o.cur, A = o.amt, n = Math.max(1, Math.min(24, Math.round(o.months))), ok = A > 0;
+    $('sym').textContent = SYM[cur] || '$';
+    var short = o.yrs < 5, lump = after12(A, 1, o.ret, o.cash), spread = after12(A, n, o.ret, o.cash), cost = lump - spread;
+    var H = Math.max(12, n);
+    // verdict
+    var vd = $('verdict'), hl = $('headline'), vt = $('vtext'), rec = n, verdict;
+    if (!ok) { vd.className = 'verdict sched'; vd.textContent = 'ADD YOUR AMOUNT'; hl.textContent = '–'; vt.textContent = 'Enter the lump sum you have sitting in cash.'; }
+    else if (short) { verdict = 'NOT STOCKS'; vd.className = 'verdict safe'; vd.textContent = 'QUESTION 1: NOT STOCKS'; hl.textContent = 'Keep it safe'; vt.innerHTML = 'You need it within <b>' + Math.round(o.yrs) + ' year' + (Math.round(o.yrs) === 1 ? '' : 's') + '</b>. Money you need within about five years belongs in a high-interest savings account, term deposit or short-term government bills, not stocks.'; rec = 0; }
+    else if (state.sell === 'yes' || state.sell === 'unsure') {
+      rec = n >= 3 && n <= 6 ? n : (state.sell === 'yes' ? 6 : 3); verdict = 'SCHEDULE';
+      vd.className = 'verdict sched'; vd.textContent = 'QUESTION 3: A SHORT, FIXED SCHEDULE';
+      hl.textContent = rec + ' parts of ' + fmt(A / rec, cur);
+      vt.innerHTML = (state.sell === 'yes' ? 'You said a ' + o.drop + '% drop would make you sell.' : "You're not sure how you'd react.") + ' Spreading it out costs a little; panic selling costs a lot. Set all ' + rec + ' dates today and make them automatic.';
+    } else {
+      rec = 1; verdict = 'ALL AT ONCE'; vd.className = 'verdict now'; vd.textContent = 'QUESTION 2: ALL AT ONCE';
+      hl.textContent = 'Invest ' + fmt(A, cur) + ' today';
+      vt.innerHTML = 'It\'s long-term money and a ' + o.drop + '% drop wouldn\'t make you sell. About 2 times in 3, all at once ends ahead. Waiting for a dip is a bet with no end date.' + (n > 1 ? ' (You entered ' + n + ' months: the cost of that is shown below.)' : '');
+    }
+    // cost card
+    var showN = n > 1 ? n : 3;
+    var sp2 = n > 1 ? spread : after12(A, 3, o.ret, o.cash), c2 = lump - sp2;
+    $('cost').innerHTML = ok ? [
+      ['All at once, after ' + H + ' months', fmt(lump, cur)],
+      ['Spread over ' + showN + ' months', fmt(sp2, cur)],
+      ['Likely cost of spreading', (c2 >= 0 ? '' : '+') + fmt(Math.abs(c2), cur) + (c2 >= 0 ? '' : ' gain')]
+    ].map(function (x) { return '<div class="row"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('') : '<p class="note">Enter an amount.</p>';
+    var mx = Math.max(lump, sp2, 1), mn = Math.min(A, lump, sp2) * 0.98;
+    $('bars').innerHTML = ok ? [['All at once', lump, 'var(--lump)'], ['Spread over ' + showN + ' months', sp2, 'var(--spread)'], ['Kept in cash for ' + H + ' months', A * Math.pow(1 + o.cash / 100, H / 12), 'var(--muted)']].map(function (b) {
+      var w = Math.max(2, (b[1] - mn) / (mx - mn) * 100); return '<div class="bar"><span>' + b[0] + ' · <b>' + fmt(b[1], cur) + '</b></span><div class="track"><div class="fill" style="width:' + Math.min(100, w).toFixed(1) + '%;background:' + b[2] + '"></div></div></div>'; }).join('') : '';
+    var hit = HIT[showN];
+    $('hit').innerHTML = hit ? 'History: all at once beat a ' + showN + '-month split <b>' + hit + '%</b> of the time over one year (Vanguard, MSCI World 1976–2022, in US dollars; 61.6–73.7% across the US, UK, Canada, Europe, Australia and emerging markets).' : (showN > 6 ? 'Vanguard found longer splits lose more often: a 6-month split lost to all at once 72.6% of the time. ' + showN + ' months is longer than anything it tested.' : 'Vanguard tested 3- to 6-month splits; all at once won 67.7–72.6% of the time.');
+    if (state.preset === 'vanguard' && ok) $('hit').innerHTML += '<div class="ref" style="margin-top:8px">Vanguard\'s historical typical year on $100,000: <b>$111,940</b> all at once vs <b>$109,580</b> over 3 months, about $2,400 less. The figures above use your return guess instead.</div>';
+    // drop test
+    var parts1 = rec > 1 ? rec : (n > 1 ? n : 3), lossLump = A * o.drop / 100, lossSp = A / parts1 * o.drop / 100;
+    $('dropRows').innerHTML = ok ? [
+      ['All at once: ' + fmt(A, cur) + ' becomes', fmt(A - lossLump, cur)],
+      ['Gone on paper', '<span style="color:var(--loss)">−' + fmt(lossLump, cur).replace('-', '') + '</span>'],
+      ['If you\'d used ' + parts1 + ' parts (only 1 invested)', '<span style="color:var(--loss)">−' + fmt(lossSp, cur).replace('-', '') + '</span>']
+    ].map(function (x) { return '<div class="row"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('') : '<p class="note">Enter an amount.</p>';
+    // schedule
+    var k = rec === 0 ? 0 : rec, now = new Date(), rows = '';
+    $('schedTitle').textContent = rec === 0 ? 'Your schedule' : (rec === 1 ? 'Your schedule: one transfer' : 'Your schedule: ' + rec + ' equal parts');
+    if (!ok) rows = '<tr><td colspan="3" class="note">Enter an amount.</td></tr>';
+    else if (rec === 0) rows = '<tr><td>–</td><td>Today</td><td>' + fmt(A, cur) + ' to a safe account</td></tr>';
+    else for (var i = 0; i < k; i++) { var d = addMonths(now, i); rows += '<tr><td>' + (i + 1) + '</td><td>' + d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + (i === 0 ? ' (today)' : '') + '</td><td>' + fmt(A / k, cur) + '</td></tr>'; }
+    $('sched').innerHTML = rows;
+    $('copybox').value = ok ? 'Invest now or wait, ' + fmt(A, cur) + ': ' + (rec === 0 ? 'needed within ' + Math.round(o.yrs) + ' years, so not stocks.' : rec === 1 ? 'all at once today.' : rec + ' equal parts, dates set today.') + ' A ' + o.drop + '% drop next month = −' + fmt(lossLump, cur).replace('-', '') + ' on paper. Spreading over ' + showN + ' months likely costs ' + fmt(Math.max(0, c2), cur) + '.' : '';
+    try { var dd = { preset: state.preset, sell: state.sell, v: {} }; IDS.forEach(function (x) { dd.v[x] = $(x).value; }); localStorage.setItem('inw-v1', JSON.stringify(dd)); } catch (e) {}
+  }
+  function setSell(s) { state.sell = s; document.querySelectorAll('[data-sell]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.sell === s); }); }
+  function setPresetUI(name) { document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.preset === name); }); $('exampleNote').textContent = (PRESETS[name] || PRESETS.blank).note; }
+  function load(name) { var p = PRESETS[name]; state.preset = name; IDS.forEach(function (k) { $(k).value = p.v[k]; }); setSell(p.sell); setPresetUI(name); update(); }
+  function toBlank() { if (state.preset !== 'blank') { state.preset = 'blank'; setPresetUI('blank'); } }
+  function restore() {
+    try { var d = JSON.parse(localStorage.getItem('inw-v1') || 'null'); if (!d || !d.v) return false;
+      IDS.forEach(function (k) { if (k in d.v && d.v[k] !== undefined) $(k).value = d.v[k]; }); state.preset = d.preset || 'blank'; setSell(d.sell || 'no'); setPresetUI(state.preset); return true; } catch (e) { return false; }
+  }
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { load(b.dataset.preset); }); });
+  document.querySelectorAll('[data-sell]').forEach(function (b) { b.addEventListener('click', function () { setSell(b.dataset.sell); toBlank(); update(); }); });
+  $('calc').addEventListener('input', function () { toBlank(); update(); });
+  $('calc').addEventListener('submit', function (e) { e.preventDefault(); });
+  $('resetBtn').addEventListener('click', function () { load('blank'); });
+  $('copyBtn').addEventListener('click', function () {
+    var txt = $('copybox').value, done = function () { $('copied').textContent = 'Copied. Paste it in the comments.'; };
+    try { navigator.clipboard.writeText(txt).then(done, function () { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }); }
+    catch (e) { $('copybox').select(); $('copied').textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.'; }
+  });
+  if (!restore()) load('priya'); else update();
+})();
+</script>
+</body>
+</html>
