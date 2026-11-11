@@ -2,6 +2,7 @@
 
 Free calculators from **The Extraordinary Money Mind** YouTube channel, hosted on GitHub Pages:
 
+- Fair split calculator for couples (50/50 vs split by income vs one joint account, any currency): `/fair-split/`
 - Subscription Audit (your real subscription number, price per use, keep / rotate / cancel, any currency): `/subscription-audit/`
 - Invest Now or Wait (lump sum vs dollar-cost averaging, any currency): `/invest-now-or-wait/`
 - Rent vs Buy (the Rent-or-Buy Test): `/rent-vs-buy/`

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fair split calculator for couples · The Extraordinary Money Mind</title>
+<meta name="description" content="Free fair split calculator for couples: enter two take-home pays and your shared costs to see what each partner keeps under 50/50, a split by income, and one joint account with equal personal money. Any currency, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fair split calculator for couples">
+<meta property="og:description" content="50/50 vs split by income vs fully joint: see what each partner actually keeps. Any currency, no sign-up.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 4 Ours First steps, then inputs (left) and a sticky result stack (right): one card per split method with two "kept" bars. One column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --pink: #FF8AB6;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8; --track: #F1E8D4;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33; --track: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #8FB2FF } .q4 { background: var(--pink) }
+.lede { max-width: 72ch; color: rgba(255,246,229,.84); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="number"] { -moz-appearance: textfield }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 10px }
+.card h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase }
+.chip { font: 900 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 7px; color: #fff; white-space: nowrap }
+.c-red { background: var(--red) } .c-blue { background: var(--blue) } .c-teal { background: var(--teal) }
+.bar { display: grid; gap: 4px }
+.bar .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700 }
+.bar .top b { font-weight: 900 }
+.track { height: 12px; background: var(--track); border-radius: 99px; overflow: hidden }
+.fill { height: 100%; border-radius: 99px; transition: width .35s ease }
+.sub { font-size: 12.5px; color: var(--muted) }
+.headline { background: #14213D; color: var(--cream); border: 0 }
+.headline .sub { color: rgba(255,246,229,.82) }
+.headline .big { font: 900 clamp(24px, 5vw, 30px)/1.12 var(--display) }
+.ours { border: 2px solid var(--teal) }
+.warn { color: var(--red); font-weight: 700 }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Extraordinary Money Mind · free calculator</div>
+  <h1>Fair split calculator for couples</h1>
+  <div class="qs"><span class="q1">1 · One joint account first</span><span class="q2">2 · Split by income, not 50/50</span><span class="q3">3 · Same no-questions money</span><span class="q4">4 · A check-in number</span></div>
+  <p class="lede">Splitting shared costs 50/50 feels fair, but when your take-home pay differs, the same bill takes a much bigger share of one partner's pay. Enter both take-home pays and what you share each month to see what each of you keeps under three setups. The math works in any currency.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load</span>
+    <button type="button" id="pAva" aria-pressed="false">Ava &amp; Leo (video example)</button>
+    <button type="button" id="pBlank" aria-pressed="false">Start blank</button>
+    <span class="note">Everything stays in your browser. No sign-up, no tracking.</span>
+  </div>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">1</span>Your two take-home pays</h2>
+        <p class="hint">Use monthly pay after tax and deductions: what actually lands in each account.</p>
+        <div class="fields">
+          <div class="f"><label for="cur">Currency</label><select id="cur"></select></div>
+          <div class="f"><label for="nA">Partner 1 name</label><input id="nA" type="text" maxlength="20" placeholder="Partner 1"></div>
+          <div class="f"><label for="iA">Partner 1 take-home / month</label><input id="iA" type="number" inputmode="decimal" min="0" step="1"></div>
+          <div class="f"><label for="nB">Partner 2 name</label><input id="nB" type="text" maxlength="20" placeholder="Partner 2"></div>
+          <div class="f"><label for="iB">Partner 2 take-home / month</label><input id="iB" type="number" inputmode="decimal" min="0" step="1"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#2FC2B0">2</span>What you share</h2>
+        <p class="hint">Rent or mortgage, utilities, groceries, insurance, transport you share, childcare, joint subscriptions.</p>
+        <div class="fields">
+          <div class="f"><label for="cost">Shared costs / month</label><input id="cost" type="number" inputmode="decimal" min="0" step="1"></div>
+          <div class="f"><label for="sav">Joint savings / month <small>(optional)</small></label><input id="sav" type="number" inputmode="decimal" min="0" step="1" placeholder="0"><small>Goals you fund together. Split the same way as costs.</small></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#8FB2FF">3</span>Ours First: personal money</h2>
+        <p class="hint">In the Ours First setup, both pays go into one joint account. Each of you then gets the same no-questions amount in a personal account. Leave it blank to see the most it could be (everything left, shared equally).</p>
+        <div class="fields">
+          <div class="f"><label for="alw">Personal money each / month <small>(optional)</small></label><input id="alw" type="number" inputmode="decimal" min="0" step="1" placeholder="max"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--pink)">4</span>Agree a check-in number</h2>
+        <p class="hint">Pick an amount together. Any purchase above it, you talk first; anything below it, no questions asked. Then hold a 20-minute money date once a month. If a partner controls your money or limits your access to it, a joint account isn't the fix: keep money and access of your own and get support.</p>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">The 50/50 gap</div>
+        <div class="big" id="head">—</div>
+        <div class="sub" id="headSub"></div>
+      </div>
+      <div class="card" id="m1"></div>
+      <div class="card" id="m2"></div>
+      <div class="card ours" id="m3"></div>
+      <p class="note">How it works: 50/50 = each pays half of costs + savings. By income = each pays their share of your combined pay, so both keep the same percentage. Ours First = all pay pooled; costs and savings come out first; each partner gets the same personal money; anything left stays in the joint account. Amounts are rounded to whole units and percentages to the nearest half point.</p>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p>From the video “Should Couples Combine Finances?” by The Extraordinary Money Mind. Sources in the video description: Olson, Rick, Small &amp; Finkel (Journal of Consumer Research, 2023); Dew, Britt &amp; Huston (Family Relations, 2012); Scott Rick, <i>Tightwads and Spendthrifts</i> (2024). Ava and Leo are an example couple. Education only, not financial or legal advice. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var CUR = [['USD','en-US'],['CAD','en-CA'],['GBP','en-GB'],['EUR','de-DE'],['INR','en-IN'],['AUD','en-AU'],['NZD','en-NZ'],['SGD','en-SG'],['ZAR','en-ZA'],['PHP','en-PH']];
+  var AVA = {cur: 'USD', nA: 'Ava', iA: '5800', nB: 'Leo', iB: '3400', cost: '4000', sav: '', alw: ''};
+  var KEY = 'fair-split-v1', IDS = ['cur', 'nA', 'iA', 'nB', 'iB', 'cost', 'sav', 'alw'];
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = $('cur');
+  CUR.forEach(function (c) { var o = document.createElement('option'); o.value = c[0]; o.textContent = c[0]; cur.appendChild(o); });
+  function loc() { for (var i = 0; i < CUR.length; i++) if (CUR[i][0] === cur.value) return CUR[i][1]; return 'en-US'; }
+  function fmt(n) { var r = Math.round(n); if (Object.is(r, -0)) r = 0; try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, maximumFractionDigits: 0, minimumFractionDigits: 0}).format(r); } catch (e) { return String(r); } }
+  function pct(x) { if (!isFinite(x)) return '—'; var v = Math.round(x * 200) / 2; return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%'; }
+  function num(v) { var x = parseFloat(v); return isFinite(x) && x >= 0 ? x : 0; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+  function bar(name, kept, pay, color) {
+    var w = pay > 0 ? Math.max(0, Math.min(1, kept / pay)) * 100 : 0;
+    return '<div class="bar"><div class="top"><span>' + esc(name) + ' keeps <b>' + fmt(kept) + '</b></span><span>' + (pay > 0 ? pct(kept / pay) + ' of pay' : '') + '</span></div>' +
+      '<div class="track"><div class="fill" style="width:' + w.toFixed(1) + '%;background:' + (kept < 0 ? 'var(--red)' : color) + '"></div></div></div>';
+  }
+  function pbar(name, amt, max) {
+    var w = max > 0 ? Math.max(0, Math.min(1, amt / max)) * 100 : 0;
+    return '<div class="bar"><div class="top"><span>' + esc(name) + ' gets <b>' + fmt(amt) + '</b></span><span>no questions</span></div>' +
+      '<div class="track"><div class="fill" style="width:' + w.toFixed(1) + '%;background:var(--teal)"></div></div></div>';
+  }
+  function state() { var s = {}; IDS.forEach(function (k) { s[k] = $(k).value; }); return s; }
+  function load(s) { IDS.forEach(function (k) { $(k).value = s[k] == null ? '' : s[k]; }); if (!$('cur').value) $('cur').value = 'USD'; calc(); }
+  function calc() {
+    var A = $('nA').value.trim() || 'Partner 1', B = $('nB').value.trim() || 'Partner 2';
+    var a = num($('iA').value), b = num($('iB').value), c = num($('cost').value), s = num($('sav').value);
+    var tot = a + b, out = c + s;
+    // 1) 50/50
+    var hA = a - out / 2, hB = b - out / 2;
+    // 2) by income
+    var shA = tot > 0 ? a / tot : 0.5, pA = out * shA, pB = out - pA, kA = a - pA, kB = b - pB;
+    // 3) Ours First
+    var pot = tot - out, maxEach = Math.max(0, pot / 2), alwIn = $('alw').value === '' ? null : num($('alw').value);
+    var each = alwIn == null ? maxEach : Math.min(alwIn, maxEach), rest = pot - 2 * each;
+    var lowName = a >= b ? B : A, highName = a >= b ? A : B;
+    var lowHalf = a >= b ? hB : hA, highHalf = a >= b ? hA : hB, lowPay = a >= b ? b : a, highPay = a >= b ? a : b;
+    if (tot <= 0) { $('head').textContent = 'Enter both take-home pays'; $('headSub').textContent = ''; }
+    else if (Math.abs(a - b) < 0.5) { $('head').textContent = 'Equal pay: 50/50 is already fair'; $('headSub').textContent = 'Both of you keep ' + fmt(hA) + ' (' + pct(a > 0 ? hA / a : 0) + ' of pay).'; }
+    else {
+      $('head').textContent = '50/50 takes ' + pct(lowPay > 0 ? (out / 2) / lowPay : 0) + ' of ' + lowName + '’s pay, ' + pct((out / 2) / highPay) + ' of ' + highName + '’s';
+      $('headSub').textContent = 'Same bill: ' + lowName + ' keeps ' + fmt(lowHalf) + ', ' + highName + ' keeps ' + fmt(highHalf) + '. Split by income, each keeps ' + pct(1 - out / tot) + ' of their pay.';
+    }
+    $('m1').innerHTML = '<h3>50/50 <span class="chip c-red">EACH PAYS ' + fmt(out / 2) + '</span></h3>' + bar(A, hA, a, 'var(--red)') + bar(B, hB, b, 'var(--red)') +
+      '<div class="sub">Shared bill takes ' + pct(a > 0 ? (out / 2) / a : 0) + ' of ' + esc(A) + '’s pay and ' + pct(b > 0 ? (out / 2) / b : 0) + ' of ' + esc(B) + '’s.' + (hA < 0 || hB < 0 ? ' <span class="warn">One partner can’t cover half.</span>' : '') + '</div>';
+    $('m2').innerHTML = '<h3>By income <span class="chip c-blue">' + pct(shA) + ' / ' + pct(1 - shA) + '</span></h3>' + bar(A, kA, a, 'var(--blue)') + bar(B, kB, b, 'var(--blue)') +
+      '<div class="sub">' + esc(A) + ' pays ' + fmt(pA) + ', ' + esc(B) + ' pays ' + fmt(pB) + '. Each keeps ' + pct(tot > 0 ? 1 - out / tot : 0) + ' of their pay.</div>';
+    var w = alwIn != null && alwIn > maxEach + 0.5 ? '<span class="warn">That’s more than you have left: at most ' + fmt(maxEach) + ' each.</span> ' : '';
+    $('m3').innerHTML = '<h3>Ours First <span class="chip c-teal">ONE JOINT ACCOUNT</span></h3>' +
+      '<div class="bar"><div class="top"><span>Left in the joint account after costs' + (s > 0 ? ' and savings' : '') + '</span><b>' + fmt(pot) + '</b></div></div>' +
+      pbar(A, each, maxEach) + pbar(B, each, maxEach) +
+      '<div class="sub">' + w + (alwIn == null ? 'Shared equally, that’s ' + fmt(each) + ' each. Most couples keep personal money smaller and leave the rest in the joint account for shared goals.' : 'Each gets ' + fmt(each) + ' a month; ' + fmt(Math.max(0, rest)) + ' stays in the joint account for shared goals.') + '</div>';
+    var pres = JSON.stringify(state()) === JSON.stringify(AVA);
+    $('pAva').setAttribute('aria-pressed', pres ? 'true' : 'false'); $('pBlank').setAttribute('aria-pressed', 'false');
+    try { localStorage.setItem(KEY, JSON.stringify(state())); } catch (e) {}
+  }
+  IDS.forEach(function (k) { $(k).addEventListener('input', calc); $(k).addEventListener('change', calc); });
+  $('pAva').addEventListener('click', function () { load(AVA); });
+  $('pBlank').addEventListener('click', function () { load({cur: cur.value, nA: '', iA: '', nB: '', iB: '', cost: '', sav: '', alw: ''}); $('pBlank').setAttribute('aria-pressed', 'true'); });
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && typeof saved === 'object' && 'iA' in saved ? saved : AVA);
+})();
+</script>
+</body>
+</html>
