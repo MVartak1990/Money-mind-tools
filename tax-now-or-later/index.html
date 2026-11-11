@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tax Now or Later Calculator: Roth vs traditional, TFSA vs RRSP, ISA vs pension · The Extraordinary Money Mind</title>
+<meta name="description" content="Free Roth vs traditional calculator (also TFSA vs RRSP and ISA vs pension): enter your tax rate now and in retirement, add benefit clawbacks, and see which account leaves you more after tax, the break-even rate and a verdict. Any currency, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tax Now or Later Calculator">
+<meta property="og:description" content="Roth vs traditional, TFSA vs RRSP, ISA vs pension: the one number that decides it is your tax rate now vs later. Any currency, no sign-up.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 4 test steps, then inputs (left) and a sticky result stack (right). One column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --pink: #FF8AB6;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8; --track: #F1E8D4;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33; --track: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #8FB2FF } .q4 { background: var(--pink) }
+.lede { max-width: 72ch; color: rgba(255,246,229,.84); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="number"] { -moz-appearance: textfield }
+.check { display: flex; gap: 10px; align-items: flex-start; font: 700 13.5px/1.35 var(--display) }
+.check input { width: 20px; height: 20px; flex: 0 0 20px; margin: 1px 0 0; accent-color: var(--teal) }
+.check small { display: block; font-weight: 500; color: var(--muted); font-size: 12px }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 10px }
+.card h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase }
+.chip { font: 900 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 7px; color: #fff; white-space: nowrap }
+.c-red { background: var(--red) } .c-blue { background: var(--blue) } .c-teal { background: var(--teal) } .c-navy { background: #14213D }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .c-navy { background: var(--yellow); color: #14213D } }
+.bar { display: grid; gap: 4px }
+.bar .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; flex-wrap: wrap }
+.bar .top b { font-weight: 900 }
+.track { height: 12px; background: var(--track); border-radius: 99px; overflow: hidden }
+.fill { height: 100%; border-radius: 99px; transition: width .35s ease }
+.sub { font-size: 12.5px; color: var(--muted) }
+.headline { background: #14213D; color: var(--cream); border: 0 }
+.headline .sub { color: rgba(255,246,229,.82) }
+.headline .big { font: 900 clamp(24px, 5vw, 30px)/1.12 var(--display) }
+.win { border: 2px solid var(--teal) }
+.warn { color: var(--red); font-weight: 700 }
+.eff { font: 800 13px/1.3 var(--display) }
+.hidden { display: none !important }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Extraordinary Money Mind · free calculator</div>
+  <h1>Tax Now or Later Calculator</h1>
+  <div class="qs"><span class="q1">1 · Employer match first</span><span class="q2">2 · Your marginal rate now</span><span class="q3">3 · Your rate later + clawbacks</span><span class="q4">4 · Compare, or split</span></div>
+  <p class="lede">Roth vs traditional, TFSA vs RRSP, ISA vs pension: one decision under three names. If your tax rate is the same when money goes in and when it comes out, both accounts leave you exactly the same. So the number that decides it is your rate now vs your rate later. Enter yours to see which account leaves you more after tax. The math works in any currency.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load</span>
+    <button type="button" data-p="omar" aria-pressed="false">Omar (video)</button>
+    <button type="button" data-p="omar20" aria-pressed="false">Omar, 20% later</button>
+    <button type="button" data-p="omar40" aria-pressed="false">Omar, 40% later</button>
+    <button type="button" data-p="hook" aria-pressed="false">$5,000 a year, 30 years</button>
+    <button type="button" data-p="grace" aria-pressed="false">Grace (low income, GIS)</button>
+    <button type="button" data-p="blank" aria-pressed="false">Start blank</button>
+    <span class="note">Everything stays in your browser. No sign-up, no tracking.</span>
+  </div>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">1</span>Your accounts</h2>
+        <p class="hint">Any employer match comes first: it's free money, whichever account it lands in. The calculator then compares the rest.</p>
+        <div class="fields">
+          <div class="f"><label for="ctry">Country (account names)</label>
+            <select id="ctry"><option value="us">US: Roth vs traditional</option><option value="ca">Canada: TFSA vs RRSP</option><option value="uk">UK: ISA vs pension</option><option value="gen">Generic</option></select></div>
+          <div class="f"><label for="cur">Currency</label><select id="cur"></select></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#2FC2B0">2</span>What you set aside</h2>
+        <p class="hint">Enter it as pay <b>before tax</b>. The tax-free account gets what's left after tax; the tax-deferred account gets the full amount, because tax is skipped on the way in.</p>
+        <div class="fields">
+          <div class="f"><label for="amt">Amount of pay, before tax</label><input id="amt" type="number" inputmode="decimal" min="0" step="1"></div>
+          <div class="f"><label for="freq">How often</label><select id="freq"><option value="once">One time</option><option value="year">Every year</option></select></div>
+          <div class="f"><label for="yrs">Years until you withdraw</label><input id="yrs" type="number" inputmode="decimal" min="0" max="70" step="1"></div>
+          <div class="f"><label for="ret">Return per year, %</label><input id="ret" type="number" inputmode="decimal" min="-20" max="30" step="0.1"><small>Same for both accounts.</small></div>
+        </div>
+        <label class="check" id="mulRow"><input type="checkbox" id="useMul"><span>Use a growth multiple instead<small>e.g. "grows four times over", as in the video.</small></span></label>
+        <div class="fields" id="mulBox"><div class="f"><label for="mul">Money grows by ×</label><input id="mul" type="number" inputmode="decimal" min="0" step="0.1"></div></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#8FB2FF">3</span>Your tax rate now and later</h2>
+        <p class="hint">Use your <b>marginal</b> rate now: the bracket your last dollar lands in, not your average rate (total tax ÷ income). A deduction saves tax at your top rate. In retirement, withdrawals fill the brackets from the bottom up, so use the average rate you expect on them.</p>
+        <div class="fields">
+          <div class="f"><label for="tNow">Marginal rate now, %</label><input id="tNow" type="number" inputmode="decimal" min="0" max="99" step="0.5"></div>
+          <div class="f"><label for="tLater">Rate on withdrawals later, %</label><input id="tLater" type="number" inputmode="decimal" min="0" max="99" step="0.5"><small>Income tax only. Add clawbacks below.</small></div>
+          <div class="f"><label for="claw">+ Benefit clawback</label>
+            <select id="claw"><option value="none">None</option><option value="gis">Canada GIS: −50¢ per $1</option><option value="ss50">US Social Security (50% zone)</option><option value="ss85">US Social Security (85% zone)</option><option value="custom">Other (add points)</option></select></div>
+          <div class="f" id="custBox"><label for="cust">Extra clawback, points</label><input id="cust" type="number" inputmode="decimal" min="0" max="99" step="1"></div>
+        </div>
+        <label class="check" id="ukRow"><input type="checkbox" id="uk25"><span>Count the UK 25% tax-free part<small>Most pension money can come out 25% tax-free (lump sum allowance £268,275), so only 75% is taxed.</small></span></label>
+        <div class="eff" id="effLine"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--pink)">4</span>The refund</h2>
+        <p class="hint">The tax-deferred account only matches the tax-free one if the tax you save now (the refund, or the bump in take-home pay) is invested too. In a study of 11 US companies that added a Roth option, people kept saving the same percentage of pay whichever account they used (Beshears, Choi, Laibson &amp; Madrian, 2017).</p>
+        <label class="check"><input type="checkbox" id="inv"><span>I invest the refund (automatically)<small>Untick if the refund would get spent. Then both accounts get the same amount from your pay, and the deferred one also pays tax at the exit.</small></span></label>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Verdict</div>
+        <div class="big" id="head">—</div>
+        <div class="sub" id="headSub"></div>
+      </div>
+      <div class="card" id="mFree"></div>
+      <div class="card" id="mDef"></div>
+      <div class="card" id="mBe"></div>
+      <p class="note">How it works: tax-free = (pay × (1 − rate now)) grown, no tax at the exit. Tax-deferred = full pay grown, then taxed at your effective rate later (if you invest the refund); if the refund is spent, it gets the same after-tax amount as the tax-free account. Yearly amounts go in at the start of each year. Same return for both; fees, inflation and contribution limits are not modelled. Amounts are rounded to whole units.</p>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p>From the video “Roth vs Traditional: Most People Pick With the Wrong Number” by The Extraordinary Money Mind. Sources in the video description: Beshears, Choi, Laibson &amp; Madrian (Journal of Public Economics, 2017); Rees-Jones &amp; Taubinsky (Review of Economic Studies, 2020); C.D. Howe Institute (2025); Canada.ca (GIS); IRS, CRA and HMRC limits for 2026. Omar and Grace are examples. Tax rules differ by country and change often. Education only, not tax or financial advice. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var CUR = [['USD','en-US'],['CAD','en-CA'],['GBP','en-GB'],['EUR','de-DE'],['INR','en-IN'],['AUD','en-AU'],['NZD','en-NZ'],['SGD','en-SG'],['ZAR','en-ZA'],['PHP','en-PH']];
+  var NAMES = {
+    us: {free: 'Roth 401(k) / Roth IRA', def: 'Traditional 401(k) / IRA', refund: 'tax saving'},
+    ca: {free: 'TFSA', def: 'RRSP', refund: 'RRSP refund'},
+    uk: {free: 'ISA', def: 'Pension', refund: 'tax relief'},
+    gen: {free: 'Tax-free account', def: 'Tax-deferred account', refund: 'tax saving'}
+  };
+  var BASE = {ctry: 'us', cur: 'USD', amt: '5000', freq: 'once', yrs: '20', ret: '7', useMul: true, mul: '4', tNow: '30', tLater: '30', claw: 'none', cust: '', uk25: false, inv: true};
+  function ext(o) { var r = {}; for (var k in BASE) r[k] = BASE[k]; for (var j in o) r[j] = o[j]; return r; }
+  var PRE = {
+    omar: ext({}),
+    omar20: ext({tLater: '20'}),
+    omar40: ext({tLater: '40'}),
+    hook: ext({freq: 'year', yrs: '30', ret: '6', useMul: false, tLater: '20'}),
+    grace: ext({ctry: 'ca', cur: 'CAD', amt: '3000', freq: 'year', yrs: '25', ret: '5', useMul: false, tNow: '20', tLater: '20', claw: 'gis'}),
+    blank: null
+  };
+  var KEY = 'tax-now-or-later-v1', IDS = ['ctry', 'cur', 'amt', 'freq', 'yrs', 'ret', 'useMul', 'mul', 'tNow', 'tLater', 'claw', 'cust', 'uk25', 'inv'];
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = $('cur');
+  CUR.forEach(function (c) { var o = document.createElement('option'); o.value = c[0]; o.textContent = c[0]; cur.appendChild(o); });
+  function loc() { for (var i = 0; i < CUR.length; i++) if (CUR[i][0] === cur.value) return CUR[i][1]; return 'en-US'; }
+  function fmt(n) { var r = Math.round(n); if (Object.is(r, -0)) r = 0; try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, maximumFractionDigits: 0, minimumFractionDigits: 0}).format(r); } catch (e) { return String(r); } }
+  function pc(x) { var v = Math.round(x * 1000) / 10; return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%'; }
+  function num(v, lo, hi) { var x = parseFloat(v); if (!isFinite(x)) x = 0; if (lo != null) x = Math.max(lo, x); if (hi != null) x = Math.min(hi, x); return x; }
+  function isBox(k) { return k === 'useMul' || k === 'uk25' || k === 'inv'; }
+  function state() { var s = {}; IDS.forEach(function (k) { s[k] = isBox(k) ? $(k).checked : $(k).value; }); return s; }
+  function load(s) { IDS.forEach(function (k) { if (isBox(k)) $(k).checked = !!s[k]; else $(k).value = s[k] == null ? '' : s[k]; }); if (!$('cur').value) $('cur').value = 'USD'; if (!$('ctry').value) $('ctry').value = 'us'; calc(); }
+  function bar(label, val, max, color) {
+    var w = max > 0 ? Math.max(0, Math.min(1, val / max)) * 100 : 0;
+    return '<div class="bar"><div class="top"><span>' + label + '</span><b>' + fmt(val) + '</b></div><div class="track"><div class="fill" style="width:' + w.toFixed(1) + '%;background:' + color + '"></div></div></div>';
+  }
+  function same(a, b) { if (!a || !b) return false; for (var i = 0; i < IDS.length; i++) { var k = IDS[i]; if (String(a[k]) !== String(b[k])) return false; } return true; }
+  function calc() {
+    var N = NAMES[$('ctry').value] || NAMES.gen;
+    var once = $('freq').value === 'once';
+    $('mulRow').classList.toggle('hidden', !once); $('mulBox').classList.toggle('hidden', !(once && $('useMul').checked));
+    $('custBox').classList.toggle('hidden', $('claw').value !== 'custom');
+    $('ukRow').classList.toggle('hidden', $('ctry').value !== 'uk');
+    var P = num($('amt').value, 0), n = num($('yrs').value, 0, 70), r = num($('ret').value, -20, 30) / 100;
+    var F;
+    if (once) F = $('useMul').checked ? num($('mul').value, 0) : Math.pow(1 + r, n);
+    else F = Math.abs(r) < 1e-9 ? n : (Math.pow(1 + r, n) - 1) / r * (1 + r);
+    var t0 = num($('tNow').value, 0, 99) / 100, tl = num($('tLater').value, 0, 99) / 100, c = $('claw').value;
+    if ($('ctry').value === 'uk' && $('uk25').checked) tl = tl * 0.75;
+    var te = tl, clawTxt = '';
+    if (c === 'gis') { te = tl + 0.5; clawTxt = ' + 50 points of GIS clawback'; }
+    else if (c === 'ss50') { te = tl * 1.5; clawTxt = ' × 1.5 (each extra $1 also makes 50¢ of Social Security taxable)'; }
+    else if (c === 'ss85') { te = tl * 1.85; clawTxt = ' × 1.85 (each extra $1 also makes 85¢ of Social Security taxable)'; }
+    else if (c === 'custom') { te = tl + num($('cust').value, 0, 99) / 100; clawTxt = ' + clawback'; }
+    te = Math.min(te, 1);
+    $('effLine').textContent = 'Effective rate on withdrawals later: ' + pc(te) + (clawTxt ? ' (' + pc(tl) + ' income tax' + clawTxt + ')' : '');
+    var inv = $('inv').checked;
+    var inFree = P * (1 - t0), inDef = inv ? P : P * (1 - t0);
+    var vFree = inFree * F, vDef = inDef * F * (1 - te), vSplit = (vFree + vDef) / 2;
+    var per = once ? '' : ' a year';
+    var mx = Math.max(vFree, vDef, 1);
+    var diff = vDef - vFree, tie = Math.abs(diff) < 0.5;
+    var winDef = !tie && diff > 0;
+    $('mFree').className = 'card' + (!tie && !winDef ? ' win' : '');
+    $('mDef').className = 'card' + (winDef ? ' win' : '');
+    $('mFree').innerHTML = '<h3>' + N.free + ' <span class="chip c-teal">TAX NOW</span></h3>' +
+      '<div class="sub">Tax at the door: ' + fmt(P * t0) + per + ' goes to tax, ' + fmt(inFree) + per + ' goes in' + (once ? ' and grows ×' + (Math.round(F * 100) / 100) : ', every year for ' + n + ' years') + '. Comes out tax-free.</div>' +
+      bar('You keep after tax', vFree, mx, 'var(--teal)');
+    $('mDef').innerHTML = '<h3>' + N.def + ' <span class="chip c-blue">TAX LATER</span></h3>' +
+      '<div class="sub">' + (inv ? 'Tax skipped on the way in: all ' + fmt(P) + per + ' goes in (with the ' + N.refund + ' invested).' : 'The ' + N.refund + ' of ' + fmt(inFree * t0) + per + ' gets spent, so only ' + fmt(inDef) + per + ' goes in.') + ' Taxed at ' + pc(te) + ' at the exit.</div>' +
+      bar('You keep after tax', vDef, mx, 'var(--blue)');
+    var be;
+    if (inv) be = 'Tax-deferred wins if your effective rate later is below <b>' + pc(t0) + '</b> (your rate now). Above it, tax-free wins. Equal rates: exactly the same money.';
+    else be = 'With the ' + N.refund + ' spent, tax-deferred only matches tax-free if your rate later is <b>0%</b>. Tax-free quietly makes you save more. Invest the refund automatically to fix it.';
+    $('mBe').innerHTML = '<h3>Break-even <span class="chip c-navy">THE ONE NUMBER</span></h3><div class="sub" style="font-size:13.5px;color:inherit">' + be + '</div>' +
+      '<div class="sub">Not sure about your rate later? Split it half and half: ' + fmt(vSplit) + '. A wrong guess either way then costs only half as much.</div>';
+    if (P <= 0 || F <= 0) { $('head').textContent = 'Enter an amount to compare'; $('headSub').textContent = ''; }
+    else if (tie) { $('head').textContent = 'A tie: both leave you ' + fmt(vFree); $('headSub').textContent = 'Same tax rate now and later, so the order of “take tax off” and “grow” doesn’t matter. Pick on flexibility, or split.'; }
+    else {
+      var w = winDef ? N.def : N.free;
+      $('head').textContent = w + ' wins by ' + fmt(Math.abs(diff));
+      var why;
+      if (!inv && !winDef) why = 'Because the ' + N.refund + ' gets spent. Invest it and compare again.';
+      else if (c === 'gis' || c === 'ss50' || c === 'ss85' || c === 'custom') why = winDef ? 'Even with the clawback, your rate now (' + pc(t0) + ') is above your effective rate later (' + pc(te) + ').' : 'The clawback lifts your effective rate later to ' + pc(te) + ', above your ' + pc(t0) + ' now. Withdrawals from the tax-free account don’t count as income.';
+      else why = winDef ? 'Your rate now (' + pc(t0) + ') is above your rate later (' + pc(te) + '): skip the tax now, pay less later. Invest the refund.' : 'Your rate now (' + pc(t0) + ') is below your rate later (' + pc(te) + '): pay the tax while it’s cheaper.';
+      $('headSub').textContent = fmt(vFree) + ' tax-free vs ' + fmt(vDef) + ' tax-deferred. ' + why;
+    }
+    var st = state(), hit = null;
+    for (var k in PRE) if (PRE[k] && same(st, PRE[k])) hit = k;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-p') === hit ? 'true' : 'false'); });
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+  }
+  IDS.forEach(function (k) { $(k).addEventListener('input', calc); $(k).addEventListener('change', calc); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function (b) {
+    b.addEventListener('click', function () {
+      var p = b.getAttribute('data-p');
+      if (p === 'blank') { load({ctry: $('ctry').value, cur: cur.value, amt: '', freq: 'year', yrs: '', ret: '', useMul: false, mul: '', tNow: '', tLater: '', claw: 'none', cust: '', uk25: true, inv: true}); b.setAttribute('aria-pressed', 'true'); }
+      else load(PRE[p]);
+    });
+  });
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && typeof saved === 'object' && 'tNow' in saved ? saved : PRE.omar);
+})();
+</script>
+</body>
+</html>
