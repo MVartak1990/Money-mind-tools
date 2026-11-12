@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escape Number Calculator: how much you need to escape the 9-to-5 (Millionaire Fastlane) · The Extraordinary Money Mind</title>
+<meta name="description" content="Free Escape Number calculator based on the method in The Millionaire Fastlane: price the life you want, turn it into pre-tax dollars (P-T-E-A), size your Money System and Peace of Mind, and see how long the Slowlane and the Fastlane take to get there. Any currency, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Escape Number Calculator (Millionaire Fastlane)">
+<meta property="og:description" content="How much do you need to never need a paycheck again? 7 steps, your own numbers, any currency. Then: Slowlane vs Fastlane, in years.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 7 steps, then inputs by step (left) and a sticky result stack (right). One column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --pink: #FF8AB6;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8; --track: #F1E8D4;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33; --track: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: var(--pink) } .q4 { background: #8FB2FF } .q5 { background: #FF9B7A }
+.lede { max-width: 72ch; color: rgba(255,246,229,.84); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+#pNote { flex-basis: 100% }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { min-width: 28px; height: 28px; padding: 0 6px; flex: 0 0 auto; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 6px; max-width: 420px }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="number"] { -moz-appearance: textfield }
+.calc { font: 700 13.5px/1.45 var(--display); background: var(--track); border-radius: 10px; padding: 9px 12px; overflow-wrap: anywhere }
+.calc b { font-weight: 900 }
+.sub-h { font: 800 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 4px 0 -4px }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 10px }
+.card h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase }
+.chip { font: 900 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 7px; color: #fff; white-space: nowrap }
+.c-red { background: var(--red) } .c-blue { background: var(--blue) } .c-teal { background: var(--teal) } .c-navy { background: #14213D }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .c-navy { background: var(--yellow); color: #14213D } }
+.bar { display: grid; gap: 4px }
+.bar .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; flex-wrap: wrap }
+.bar .top b { font-weight: 900 }
+.track { height: 12px; background: var(--track); border-radius: 99px; overflow: hidden }
+.fill { height: 100%; border-radius: 99px; transition: width .35s ease }
+.stack { display: flex; height: 16px; border-radius: 99px; overflow: hidden; background: var(--track) }
+.stack div { height: 100%; transition: width .35s ease }
+.legend { display: grid; gap: 6px; font-size: 13px; font-weight: 700 }
+.legend div { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 8px; align-items: center }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: block }
+.legend b { font-weight: 900 }
+.sub { font-size: 12.5px; color: var(--muted) }
+.headline { background: #14213D; color: var(--cream); border: 0 }
+.headline .sub { color: rgba(255,246,229,.82) }
+.headline .big { font: 900 clamp(30px, 7vw, 40px)/1.05 var(--display); color: var(--yellow); overflow-wrap: anywhere }
+.warn { color: var(--red); font-weight: 700 }
+.hidden { display: none !important }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Extraordinary Money Mind · free calculator</div>
+  <h1>Escape Number Calculator</h1>
+  <div class="qs"><span class="q1">1–2 · Price your vision</span><span class="q2">3 · P-T-E-A</span><span class="q3">4 · Yearly cost</span><span class="q4">5 · Money System</span><span class="q5">6 · Peace of Mind</span><span class="q1">7 · Add it up</span></div>
+  <p class="lede">Your Escape Number is the amount that pays for the life you want without ever needing a paycheck again. The method comes from The Millionaire Fastlane by MJ DeMarco: price what you want to own, turn it into pre-tax dollars, add a Money System that pays your yearly costs from interest alone, then a Peace of Mind cushion. Enter your numbers, then see how long the Slowlane and the Fastlane take to get you there. Works in any currency.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load</span>
+    <button type="button" data-p="maya" aria-pressed="false">Maya (video)</button>
+    <button type="button" data-p="mayaTyp" aria-pressed="false">Maya, typical business</button>
+    <button type="button" data-p="blank" aria-pressed="false">Start blank</button>
+    <span class="note">Everything stays in your browser. No sign-up, no tracking.</span>
+    <p class="note" id="pNote"></p>
+  </div>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num" style="background:var(--cream);border:1.5px solid var(--line)">0</span>Before you start</h2>
+        <p class="hint">Use the share of income you'd pay in all income taxes combined. The video uses 30%. A higher rate makes the number bigger, because everything you buy is paid for with money that's already been taxed.</p>
+        <div class="fields">
+          <div class="f"><label for="cur">Currency</label><select id="cur"></select></div>
+          <div class="f"><label for="tax">Tax rate, %</label><input id="tax" type="number" inputmode="decimal" min="0" max="90" step="1"></div>
+        </div>
+        <div class="calc" id="lTax"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">1–2</span>Price what you want to own</h2>
+        <p class="hint">Picture the life you'd actually want in ten years, not a fantasy. Then look up real prices today (listings, dealer sites) for every big thing in it.</p>
+        <div class="fields">
+          <div class="f"><label for="home">Home</label><input id="home" type="number" inputmode="decimal" min="0" step="1000"></div>
+          <div class="f"><label for="car">Car</label><input id="car" type="number" inputmode="decimal" min="0" step="500"></div>
+          <div class="f"><label for="other">Anything else</label><input id="other" type="number" inputmode="decimal" min="0" step="500"><small>Cottage, boat, tuition fund…</small></div>
+        </div>
+        <div class="calc" id="lA"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#2FC2B0">3</span>Turn it into pre-tax dollars (P-T-E-A)</h2>
+        <p class="hint">Pre-Tax Equivalent Amount: how much you'd have to <b>earn</b> to pay for it, since you buy things with after-tax money.</p>
+        <div class="calc" id="lB"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--pink)">4</span>Add what that life costs every year</h2>
+        <p class="hint">Owning things costs money: insurance, property tax, upkeep. DeMarco estimates about 1.5% of their value a year. Add everything else you'd spend: food, travel, fun.</p>
+        <div class="fields">
+          <div class="f"><label for="carry">Carrying cost, % of value a year</label><input id="carry" type="number" inputmode="decimal" min="0" max="20" step="0.1"></div>
+          <div class="f" style="grid-column:1/-1"><label for="live">Living costs &amp; fun, after tax</label>
+            <div class="pair"><input id="live" type="number" inputmode="decimal" min="0" step="100"><select id="livePer" aria-label="Living costs per"><option value="y">per year</option><option value="m">per month</option></select></div></div>
+        </div>
+        <div class="calc" id="lC"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#8FB2FF">5</span>Size your Money System</h2>
+        <p class="hint">The pot that pays your yearly cost from interest alone, without touching the pot. DeMarco uses a 5% yield; pick one you trust. A lower yield makes the pot much bigger.</p>
+        <div class="fields">
+          <div class="f"><label for="yld">Yield, % a year</label><input id="yld" type="number" inputmode="decimal" min="0.1" max="20" step="0.1"><small>The video's 5% sat just under the 10-year US Treasury (5.24%, Oct 9, 2026).</small></div>
+        </div>
+        <div class="calc" id="lD"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#FF9B7A">6</span>Add your Peace of Mind</h2>
+        <p class="hint">A cushion for crashes and recessions, as a share of your Money System. You choose the size; the video uses 50%.</p>
+        <div class="fields">
+          <div class="f"><label for="pom">Cushion, % of the Money System</label><input id="pom" type="number" inputmode="decimal" min="0" max="200" step="5"></div>
+        </div>
+        <div class="calc" id="lE"></div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--navy);color:var(--yellow)">→</span>How long to get there?</h2>
+        <p class="hint">Two roads to the same number, in today's money. Not a forecast: a way to see which road can actually get you there.</p>
+        <div class="sub-h">Slowlane: save and invest</div>
+        <div class="fields">
+          <div class="f"><label for="saved">Saved so far</label><input id="saved" type="number" inputmode="decimal" min="0" step="1000"></div>
+          <div class="f"><label for="save">You save per year</label><input id="save" type="number" inputmode="decimal" min="0" step="500"><small>The video: 15% of a $60,000 salary.</small></div>
+          <div class="f"><label for="ret">Growth, % a year</label><input id="ret" type="number" inputmode="decimal" min="-10" max="20" step="0.1"></div>
+        </div>
+        <div class="sub-h">Fastlane: build a business</div>
+        <div class="fields">
+          <div class="f"><label for="profit">Business profit per year</label><input id="profit" type="number" inputmode="decimal" min="0" step="1000"><small>Before tax. Typical small business: $155,921 cash flow (BizBuySell, Q2 2026).</small></div>
+          <div class="f"><label for="mult">Sale price, × yearly profit</label><input id="mult" type="number" inputmode="decimal" min="0" max="20" step="0.1"><small>Average small-business sale: 2.7× (BizBuySell, Q2 2026).</small></div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">Your Escape Number</div>
+        <div class="big" id="head">—</div>
+        <div class="sub" id="headSub"></div>
+      </div>
+      <div class="card" id="mParts"></div>
+      <div class="card" id="mRoads"></div>
+      <p class="note">How it works: tax factor = 1 − tax rate. A = what you want to own. B (P-T-E-A) = A ÷ factor. C = (carrying % × A + living costs) ÷ factor. Money System D = (C ÷ yield) ÷ factor. Peace of Mind E = (cushion % × C ÷ yield) ÷ factor. Escape Number = B + D + E. Slowlane: yearly savings added at the end of each year, growing at your rate, until they reach the Escape Number in after-tax money (Escape Number × factor), because savings are already taxed. Fastlane: years of profit, plus the sale price at the end, until they reach the Escape Number. Inflation, fees and business risk are not modelled. Amounts are rounded to whole units.</p>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p>From the video “The Millionaire Fastlane: How Much You Need to Escape the 9-to-5” by The Extraordinary Money Mind. Method: MJ DeMarco, The Millionaire Fastlane (2011). Maya is an example; her home is the median new US home ($410,700, FRED, Q2 2026) and her car the average new car ($50,562, Kelley Blue Book, Sep 2026). Business cash flow and sale multiple: BizBuySell Insight Report, Q2 2026. Most new businesses don't survive ten years (US Bureau of Labor Statistics). Education only, not financial advice. Starting a business carries risk; investments can lose value. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var CUR = [['USD','en-US'],['CAD','en-CA'],['GBP','en-GB'],['EUR','de-DE'],['INR','en-IN'],['AUD','en-AU'],['NZD','en-NZ'],['SGD','en-SG'],['ZAR','en-ZA'],['PHP','en-PH']];
+  var BASE = {cur: 'USD', tax: '30', home: '410700', car: '50562', other: '0', carry: '1.5', live: '48000', livePer: 'y', yld: '5', pom: '50', saved: '0', save: '9000', ret: '7', profit: '500000', mult: '2.7'};
+  function ext(o) { var r = {}; for (var k in BASE) r[k] = BASE[k]; for (var j in o) r[j] = o[j]; return r; }
+  var PRE = {
+    maya: {v: ext({}), note: "Maya's example from the video: median new US home + average new car, $48,000 a year to live on, 30% tax. The video rounds the home and car to $461,000, so it shows $4,020,714; the exact prices give a few hundred dollars more. Replace any number with yours."},
+    mayaTyp: {v: ext({profit: '155921'}), note: 'Same Escape Number, but with a typical small business ($155,921 a year, the BizBuySell median). This is why the book says a Fastlane business has to serve many people.'},
+    blank: {v: null, note: 'Enter your own numbers. Nothing you type leaves this browser.'}
+  };
+  var KEY = 'escape-number-v1', IDS = ['cur', 'tax', 'home', 'car', 'other', 'carry', 'live', 'livePer', 'yld', 'pom', 'saved', 'save', 'ret', 'profit', 'mult'];
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = $('cur');
+  CUR.forEach(function (c) { var o = document.createElement('option'); o.value = c[0]; o.textContent = c[0]; cur.appendChild(o); });
+  function loc() { for (var i = 0; i < CUR.length; i++) if (CUR[i][0] === cur.value) return CUR[i][1]; return 'en-US'; }
+  function fmt(n) { var r = Math.round(n); if (Object.is(r, -0)) r = 0; try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, maximumFractionDigits: 0, minimumFractionDigits: 0}).format(r); } catch (e) { return String(r); } }
+  function short(n) { if (Math.abs(n) < 1e6) return fmt(n); try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, notation: 'compact', maximumFractionDigits: 2}).format(n); } catch (e) { return fmt(n); } }
+  function dec(x, d) { return (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString(loc(), {minimumFractionDigits: d, maximumFractionDigits: d}); }
+  function pc(x) { var v = Math.round(x * 1000) / 10; return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + '%'; }
+  function num(v, lo, hi) { var x = parseFloat(v); if (!isFinite(x)) x = 0; if (lo != null) x = Math.max(lo, x); if (hi != null) x = Math.min(hi, x); return x; }
+  function state() { var s = {}; IDS.forEach(function (k) { s[k] = $(k).value; }); return s; }
+  function load(s) { IDS.forEach(function (k) { $(k).value = s[k] == null ? '' : s[k]; }); if (!cur.value) cur.value = 'USD'; if (!$('livePer').value) $('livePer').value = 'y'; calc(); }
+  function same(a, b) { if (!a || !b) return false; for (var i = 0; i < IDS.length; i++) { var k = IDS[i]; if (String(a[k]) !== String(b[k])) return false; } return true; }
+  function bar(label, val, max, color, txt) {
+    var w = max > 0 ? Math.max(0, Math.min(1, val / max)) * 100 : 0;
+    return '<div class="bar"><div class="top"><span>' + label + '</span><b>' + txt + '</b></div><div class="track"><div class="fill" style="width:' + w.toFixed(1) + '%;background:' + color + '"></div></div></div>';
+  }
+  function calc() {
+    var t = num($('tax').value, 0, 90) / 100, f = 1 - t;
+    var A = num($('home').value, 0) + num($('car').value, 0) + num($('other').value, 0);
+    var cp = num($('carry').value, 0, 20) / 100, live = num($('live').value, 0) * ($('livePer').value === 'm' ? 12 : 1);
+    var y = num($('yld').value, 0, 20) / 100, pm = num($('pom').value, 0, 200) / 100;
+    var B = A / f, carry = cp * A, yr = carry + live, C = yr / f;
+    var pot = y > 0 ? C / y : 0, D = pot / f, cush = pm * pot, E = cush / f, X = B + D + E;
+    var fx = dec(f, 2);
+    $('lTax').innerHTML = 'Tax factor = 1 − ' + pc(t) + ' = <b>' + fx + '</b>';
+    $('lA').innerHTML = 'A = <b>' + fmt(A) + '</b> to own';
+    $('lB').innerHTML = 'B = ' + fmt(A) + ' ÷ ' + fx + ' = <b>' + fmt(B) + '</b>';
+    $('lC').innerHTML = pc(cp) + ' × ' + fmt(A) + ' = ' + fmt(carry) + ' carrying + ' + fmt(live) + ' living = ' + fmt(yr) + ' a year after tax<br>C = ' + fmt(yr) + ' ÷ ' + fx + ' = <b>' + fmt(C) + ' a year</b> before tax';
+    $('lD').innerHTML = y > 0 ? fmt(C) + ' ÷ ' + pc(y) + ' = ' + fmt(pot) + ' pot<br>D = ' + fmt(pot) + ' ÷ ' + fx + ' = <b>' + fmt(D) + '</b>' : '<span class="warn">Enter a yield above 0%.</span>';
+    $('lE').innerHTML = pc(pm) + ' × ' + fmt(pot) + ' = ' + fmt(cush) + '<br>E = ' + fmt(cush) + ' ÷ ' + fx + ' = <b>' + fmt(E) + '</b>';
+
+    var ok = A + live > 0 && y > 0;
+    if (!ok) { $('head').textContent = '—'; $('headSub').textContent = y > 0 ? 'Enter what you want to own and what your life costs a year.' : 'Enter a yield above 0% in step 5.'; $('mParts').innerHTML = ''; $('mRoads').innerHTML = ''; }
+    else {
+      $('head').textContent = fmt(X);
+      $('headSub').textContent = 'About ' + short(X) + ' before tax. It buys what you want to own, keeps paying ' + fmt(C) + ' a year (' + fmt(C / 12) + ' a month) before tax from interest alone, and leaves a ' + pc(pm) + ' cushion.';
+      var p = function (v) { return X > 0 ? (v / X * 100).toFixed(2) : 0; };
+      $('mParts').innerHTML = '<h3>How it adds up <span class="chip c-navy">B + D + E</span></h3>' +
+        '<div class="stack" role="img" aria-label="Escape Number parts"><div style="width:' + p(B) + '%;background:#2FC2B0"></div><div style="width:' + p(D) + '%;background:#8FB2FF"></div><div style="width:' + p(E) + '%;background:#FF9B7A"></div></div>' +
+        '<div class="legend"><div><i style="background:#2FC2B0"></i><span>B · P-T-E-A (what you own)</span><b>' + fmt(B) + '</b></div>' +
+        '<div><i style="background:#8FB2FF"></i><span>D · Money System</span><b>' + fmt(D) + '</b></div>' +
+        '<div><i style="background:#FF9B7A"></i><span>E · Peace of Mind</span><b>' + fmt(E) + '</b></div></div>' +
+        '<div class="sub">The Money System is usually the biggest part: every extra ' + fmt(1000) + ' a year you want to spend adds ' + fmt(1000 / f / y / f * (1 + pm)) + ' to your Escape Number.</div>';
+
+      // Slowlane: after-tax savings vs the after-tax target.
+      var T = X * f, bal = num($('saved').value, 0), P = num($('save').value, 0), r = num($('ret').value, -10, 20) / 100, n = 0, cap = 100;
+      while (bal < T && n < cap) { bal = bal * (1 + r) + P; n++; }
+      var slow = bal >= T ? n : null;
+      // Fastlane: pre-tax profit each year, then a sale at the multiple.
+      var pr = num($('profit').value, 0), m = num($('mult').value, 0, 20), fast = pr > 0 ? Math.max(0, (X - m * pr) / pr) : null;
+      var mx = Math.max(slow == null ? cap : slow, fast == null ? 0 : fast, 1);
+      var sTxt = slow == null ? (cap + '+ years') : (slow === 0 ? 'already there' : 'about ' + slow + ' years');
+      var fTxt = fast == null ? 'enter a profit' : (fast === 0 ? 'one sale gets you there' : 'about ' + dec(fast, 1) + ' years');
+      var sDesc = 'Saving ' + fmt(P) + ' a year at ' + pc(r) + (num($('saved').value, 0) > 0 ? ', starting from ' + fmt(num($('saved').value, 0)) : '') + ', until it reaches ' + fmt(T) + ' (your Escape Number in after-tax money, since savings are already taxed).';
+      var fDesc = pr > 0 ? fmt(pr) + ' profit a year, then a sale at ' + dec(m, 1) + '× = ' + fmt(m * pr) + '. Wealth = net profit + asset value.' : 'Enter a yearly profit to compare.';
+      var ratio = (slow != null && fast != null && fast > 0) ? ' The Fastlane is ' + dec(slow / fast, 1) + '× faster here.' : '';
+      $('mRoads').innerHTML = '<h3>Two roads <span class="chip c-red">IN YEARS</span></h3>' +
+        bar('Slowlane', slow == null ? cap : slow, mx, 'var(--blue)', sTxt) + '<div class="sub">' + sDesc + '</div>' +
+        bar('Fastlane', fast == null ? 0 : fast, mx, 'var(--teal)', fTxt) + '<div class="sub">' + fDesc + ratio + '</div>' +
+        '<div class="sub"><b>The honest catch:</b> a business can fail, and most new ones don\'t last ten years. Keep the Slowlane running as your safety net while you build.</div>';
+    }
+    var st = state(), hit = null;
+    for (var k in PRE) if (PRE[k].v && same(st, PRE[k].v)) hit = k;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-p') === hit ? 'true' : 'false'); });
+    $('pNote').textContent = hit ? PRE[hit].note : '';
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+  }
+  IDS.forEach(function (k) { $(k).addEventListener('input', calc); $(k).addEventListener('change', calc); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function (b) {
+    b.addEventListener('click', function () {
+      var p = b.getAttribute('data-p');
+      if (p === 'blank') { load({cur: cur.value, tax: '', home: '', car: '', other: '', carry: '1.5', live: '', livePer: 'y', yld: '5', pom: '50', saved: '', save: '', ret: '7', profit: '', mult: '2.7'}); b.setAttribute('aria-pressed', 'true'); $('pNote').textContent = PRE.blank.note; }
+      else load(PRE[p].v);
+    });
+  });
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && typeof saved === 'object' && 'yld' in saved ? saved : PRE.maya.v);
+})();
+</script>
+</body>
+</html>
