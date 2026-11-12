@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coin Flip Challenge: how much should you bet? · The Extraordinary Money Mind</title>
+<meta name="description" content="Free Coin Flip Challenge and Kelly criterion calculator: play the famous 60/40 coin flip experiment with $25, simulate 1,000 players with all-in, doubling, fixed and fixed-fraction betting, and find the Kelly and half-Kelly bet size for your own odds. No sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Coin Flip Challenge: how much should you bet?">
+<meta property="og:description" content="A coin that lands heads 60% of the time. 28% of finance-trained players still went broke. Play it, simulate 1,000 players, and find your Kelly fraction.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ccircle cx='32' cy='32' r='19' fill='%23FFC93C'/%3E%3Ctext x='32' y='41' font-family='Arial' font-weight='900' font-size='24' text-anchor='middle' fill='%2314213D'%3EH%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 4-step Fixed-Fraction Rule, three tabs (play / simulate / your odds). Each tab: inputs left, result stack right; one column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --pink: #FF8AB6;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8; --track: #F1E8D4;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33; --track: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #8FB2FF } .q4 { background: var(--pink) }
+.lede { max-width: 72ch; color: rgba(255,246,229,.84); margin: 0 }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 18px 6px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"], button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:disabled { opacity: .45; cursor: not-allowed }
+button.big { font: 900 16px/1 var(--display); padding: 14px 22px; background: var(--yellow); color: var(--navy); border-color: var(--yellow) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="range"] { padding: 0; accent-color: var(--teal) }
+input[type="number"] { -moz-appearance: textfield }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 10px }
+.card h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase }
+.headline { background: #14213D; color: var(--cream); border: 0 }
+.headline .sub { color: rgba(255,246,229,.82) }
+.headline .big { font: 900 clamp(26px, 6vw, 40px)/1.08 var(--display) }
+.sub { font-size: 12.5px; color: var(--muted) }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+.stat { background: var(--field); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-width: 0 }
+.stat b { display: block; font: 900 22px/1.1 var(--display) }
+.stat span { font-size: 12px; color: var(--muted); font-weight: 700 }
+.coin { width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; font: 900 46px/1 var(--display); background: var(--yellow); color: var(--navy); box-shadow: 0 8px 0 #c9971f; margin: 4px auto; transition: transform .35s }
+.coin.t { background: #8FB2FF; box-shadow: 0 8px 0 #5b7fd0 }
+.coin.spin { transform: rotateY(720deg) }
+canvas { width: 100%; height: 170px; display: block; background: var(--field); border: 1px solid var(--line); border-radius: 12px }
+table { width: 100%; border-collapse: collapse; font-size: 13px }
+th, td { text-align: right; padding: 7px 6px; border-bottom: 1px solid var(--line); white-space: nowrap }
+th:first-child, td:first-child { text-align: left; white-space: normal }
+th { font: 800 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.tw { overflow-x: auto }
+.good { color: var(--teal); font-weight: 900 } .bad { color: var(--red); font-weight: 900 }
+.warn { color: var(--red); font-weight: 700 }
+.cats { display: grid; gap: 6px }
+.cat { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--line); font-size: 13px; font-weight: 700 }
+.cat.me { border-color: var(--yellow); background: rgba(255,201,60,.18) }
+[hidden] { display: none !important }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Extraordinary Money Mind · free calculator</div>
+  <h1>Coin Flip Challenge: how much should you bet?</h1>
+  <div class="qs"><span class="q1">1 · Name your edge</span><span class="q2">2 · Survival first</span><span class="q3">3 · A fixed slice of what you have now</span><span class="q4">4 · Then halve it</span></div>
+  <p class="lede">In 2016, 61 people trained in finance got $25 and 30 minutes to bet on a coin they were told lands heads 60% of the time. 28% went bust. Play the same game, then run 1,000 players through each betting strategy, and find the bet size for your own odds. Dollars here, but the math works in any currency.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="tabs" role="tablist" aria-label="Modes">
+    <button type="button" role="tab" id="tPlay" aria-selected="true" aria-controls="vPlay">1 · Play it</button>
+    <button type="button" role="tab" id="tSim" aria-selected="false" aria-controls="vSim">2 · Simulate 1,000 players</button>
+    <button type="button" role="tab" id="tOdds" aria-selected="false" aria-controls="vOdds">3 · Your own odds</button>
+  </div>
+
+  <!-- MODE 1: PLAY -->
+  <section id="vPlay" role="tabpanel" aria-labelledby="tPlay">
+    <div class="grid">
+      <div class="steps">
+        <section class="step">
+          <h2><span class="num" style="background:var(--yellow)">1</span>Place your bet</h2>
+          <p class="hint">You start with $25. The coin lands heads 60% of the time and pays even money. The game ends after 30 minutes, 300 flips, or when you reach the $250 cap.</p>
+          <div class="fields">
+            <div class="f"><label for="bet">Bet ($)</label><input id="bet" type="number" inputmode="decimal" min="0.01" step="0.01" value="5"></div>
+            <div class="f"><label for="side">On</label><select id="side"><option value="H">Heads (60%)</option><option value="T">Tails (40%)</option></select></div>
+          </div>
+          <div class="row" role="group" aria-label="Quick bet sizes">
+            <button type="button" data-q="0.1">10% of what I have</button>
+            <button type="button" data-q="0.2">20% of what I have</button>
+            <button type="button" data-q="1">All in</button>
+            <span class="note">A % button stays on: your bet is recalculated after every flip until you type your own amount.</span>
+          </div>
+          <div class="row"><button type="button" class="big" id="flip">Flip</button><button type="button" id="restart">Start over</button><span class="note" id="clock">30:00 left · 0 of 300 flips</span></div>
+          <p class="warn" id="playMsg" aria-live="polite"></p>
+        </section>
+        <section class="step">
+          <h2><span class="num" style="background:#2FC2B0">2</span>Your path</h2>
+          <canvas id="pathC" width="900" height="340" aria-label="Your bankroll after each flip"></canvas>
+          <p class="note" id="pathNote">Your bankroll after each flip. The dashed line is your $25 start.</p>
+        </section>
+      </div>
+      <aside class="result" aria-live="polite">
+        <div class="card headline">
+          <div class="kicker">Your bankroll</div>
+          <div class="coin" id="coin" aria-hidden="true">H</div>
+          <div class="big" id="bank">$25.00</div>
+          <div class="sub" id="bankSub">Bet a slice, pick a side, flip.</div>
+        </div>
+        <div class="card">
+          <h3>How the 61 players finished</h3>
+          <div class="cats" id="cats"></div>
+          <p class="note">Haghani &amp; Dewey (2016). Bust = under $2, maxed = $200 or more (the paper's definitions). Their average payout was $91; the authors put the game's value close to $240.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- MODE 2: SIMULATE -->
+  <section id="vSim" role="tabpanel" aria-labelledby="tSim" hidden>
+    <div class="row" style="padding-block:6px" role="group" aria-label="Video examples">
+      <span class="note" style="font-weight:800;letter-spacing:.12em;text-transform:uppercase">Load</span>
+      <button type="button" id="pFour">The four strategies (video)</button>
+      <button type="button" id="pAvg">40% with no cap: average vs typical (video)</button>
+    </div>
+    <div class="grid">
+      <div class="steps">
+        <section class="step">
+          <h2><span class="num" style="background:var(--yellow)">1</span>Pick a strategy</h2>
+          <div class="fields">
+            <div class="f"><label for="strat">Strategy</label><select id="strat">
+              <option value="allin">All in, every flip</option>
+              <option value="fixed">Fixed dollar amount</option>
+              <option value="double">Double after every loss</option>
+              <option value="frac">Fixed % of what you have</option>
+              <option value="kelly">Kelly: 2p − 1 of what you have</option>
+              <option value="half">Half-Kelly</option>
+            </select></div>
+            <div class="f" id="fFixed"><label for="fixed">Fixed bet ($) <small>also the doubling start</small></label><input id="fixed" type="number" inputmode="decimal" min="0.01" step="0.01" value="1"></div>
+            <div class="f" id="fFrac"><label for="frac">Bet <b id="fracV">20</b>% of what you have</label><input id="frac" type="range" min="1" max="100" step="1" value="20"></div>
+          </div>
+        </section>
+        <section class="step">
+          <h2><span class="num" style="background:#2FC2B0">2</span>The game</h2>
+          <div class="fields">
+            <div class="f"><label for="sp">Chance of heads (%)</label><input id="sp" type="number" inputmode="decimal" min="1" max="99" step="1" value="60"></div>
+            <div class="f"><label for="sStart">Start ($)</label><input id="sStart" type="number" inputmode="decimal" min="1" step="1" value="25"></div>
+            <div class="f"><label for="sFlips">Flips</label><input id="sFlips" type="number" inputmode="numeric" min="1" max="2000" step="1" value="300"></div>
+            <div class="f"><label for="sCap">Cap ($) <small>0 = no cap</small></label><input id="sCap" type="number" inputmode="decimal" min="0" step="1" value="250"></div>
+            <div class="f"><label for="sN">Players</label><input id="sN" type="number" inputmode="numeric" min="10" max="5000" step="10" value="1000"></div>
+            <div class="f"><label for="sSeed">Random seed <small>same seed = same coin flips</small></label><input id="sSeed" type="number" inputmode="numeric" step="1" value="2016"></div>
+          </div>
+          <p class="note">Every player bets on heads, rounded down to whole cents. Bust = under $2.</p>
+        </section>
+        <section class="step">
+          <h2><span class="num" style="background:#8FB2FF">3</span>All strategies on this game</h2>
+          <div class="tw"><table id="cmp"></table></div>
+          <p class="note">Same coin flips for every row (same seed), so the only difference is bet size.</p>
+        </section>
+      </div>
+      <aside class="result" aria-live="polite">
+        <div class="card headline">
+          <div class="kicker" id="sKick">Fixed 20%</div>
+          <div class="big" id="sHead">—</div>
+          <div class="sub" id="sSub"></div>
+        </div>
+        <div class="card">
+          <div class="stats" id="sStats"></div>
+        </div>
+        <div class="card">
+          <h3>Where the players ended</h3>
+          <canvas id="histC" width="900" height="340" aria-label="Histogram of final bankrolls"></canvas>
+          <p class="note" id="histNote"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- MODE 3: YOUR ODDS -->
+  <section id="vOdds" role="tabpanel" aria-labelledby="tOdds" hidden>
+    <div class="grid">
+      <div class="steps">
+        <section class="step">
+          <h2><span class="num" style="background:var(--yellow)">1</span>Your edge, honestly</h2>
+          <p class="hint">Kelly needs your real chance of winning and what you win per $1 risked. In markets you never know these. You're guessing, and most people guess too high.</p>
+          <div class="fields">
+            <div class="f"><label for="kp">Chance of winning (%)</label><input id="kp" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="60"></div>
+            <div class="f"><label for="kb">Win per $1 risked ($) <small>1 = even money</small></label><input id="kb" type="number" inputmode="decimal" min="0.01" step="0.05" value="1"></div>
+            <div class="f"><label for="kl">Lose per $1 risked ($) <small>1 = lose the whole stake</small></label><input id="kl" type="number" inputmode="decimal" min="0.01" max="1" step="0.05" value="1"></div>
+          </div>
+        </section>
+        <section class="step">
+          <h2><span class="num" style="background:#2FC2B0">2</span>Growth by bet size</h2>
+          <canvas id="growC" width="900" height="340" aria-label="Typical growth per bet by bet size"></canvas>
+          <p class="note">Typical (median) growth per bet. It peaks at the Kelly fraction and falls below zero at about twice it: betting more makes you poorer, not richer.</p>
+        </section>
+      </div>
+      <aside class="result" aria-live="polite">
+        <div class="card headline">
+          <div class="kicker">Kelly fraction</div>
+          <div class="big" id="kHead">—</div>
+          <div class="sub" id="kSub"></div>
+        </div>
+        <div class="card"><div class="stats" id="kStats"></div></div>
+        <div class="card"><p class="note"><b>Before you use this:</b> the inputs are guesses. Overestimate your edge and the full Kelly bet becomes an over-bet, where growth falls and ruin rises. That's why professionals bet half or less, and why nothing whose loss ends your plan (rent, emergency fund, the whole portfolio) belongs on the table.</p></div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>From the video “The Coin Flip Experiment” by The Extraordinary Money Mind. Sources: Haghani &amp; Dewey, “Rational Decision-Making Under Uncertainty: Observed Betting Patterns on a Biased Coin” (2016); Haghani, White &amp; Bell, “When a Crystal Ball Isn't Enough to Make You Rich” (Elm Wealth, 2024); Kelly, Bell System Technical Journal (1956); MacLean, Thorp &amp; Ziemba, Quantitative Finance (2010). Simulations use a fixed random seed so they match the video. Education only, not investment advice. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'coin-flip-challenge-v1';
+  function money(n, d) { if (!isFinite(n)) return '—'; d = d == null ? (Math.abs(n) < 1000 ? 2 : 0) : d; try { return new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: d, minimumFractionDigits: d}).format(n); } catch (e) { return '$' + n.toFixed(d); } }
+  function big(n) { if (!isFinite(n)) return '—'; if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + ' billion'; if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + ' million'; return money(n, n >= 1000 ? 0 : 2); }
+  function pc(x) { return (Math.round(x * 10) / 10).toFixed(x % 1 === 0 ? 0 : 1) + '%'; }
+  function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#14213D'; }
+
+  // ---------- shared simulation core (same code that produced the video's numbers) ----------
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function simulate(o){
+    var rnd=mulberry32(o.seed), ends=[];
+    for(var i=0;i<o.players;i++){
+      var w=o.start, lastBet=o.base, lastWon=true;
+      for(var f=0;f<o.flips;f++){
+        if(o.cap&&w>=o.cap){w=o.cap;break;}
+        if(w<0.01)break;
+        var b;
+        switch(o.strategy){
+          case 'allin': b=w;break;
+          case 'fixed': b=Math.min(o.fixed,w);break;
+          case 'double': b=lastWon?o.base:lastBet*2; b=Math.min(b,w);break;
+          case 'frac': b=w*o.frac;break;
+          case 'kelly': b=w*Math.max(0,2*o.p-1);break;
+          case 'half': b=w*Math.max(0,2*o.p-1)/2;break;
+        }
+        b=Math.floor(b*100)/100; if(b<0.01)b=Math.min(0.01,w);
+        var win=rnd()<o.p;
+        w=+(w+(win?b:-b)).toFixed(2);
+        lastBet=b;lastWon=win;
+      }
+      if(o.cap&&w>=o.cap)w=o.cap;
+      ends.push(w);
+    }
+    ends.sort(function(a,b){return a-b;});
+    var n=ends.length, cnt=function(fn){var c=0;for(var i=0;i<n;i++)if(fn(ends[i]))c++;return Math.round(1000*c/n)/10;};
+    var sum=0;for(var j=0;j<n;j++)sum+=ends[j];
+    return {bust:cnt(function(x){return x<2;}), below:cnt(function(x){return x<o.start;}), cap:o.cap?cnt(function(x){return x>=o.cap;}):null, median:ends[Math.floor(n/2)], mean:sum/n, ends:ends};
+  }
+
+  // ---------- tabs ----------
+  var tabs = [['tPlay','vPlay'],['tSim','vSim'],['tOdds','vOdds']];
+  function show(i) { tabs.forEach(function (t, j) { $(t[0]).setAttribute('aria-selected', i === j ? 'true' : 'false'); $(t[1]).hidden = i !== j; }); if (i === 1) runSim(); if (i === 2) odds(); }
+  tabs.forEach(function (t, i) { $(t[0]).addEventListener('click', function () { show(i); }); });
+
+  // ---------- MODE 1: play ----------
+  var G;
+  function rand() { try { var a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; } catch (e) { return Math.random(); } }
+  function newGame() { G = {w: 25, path: [25], flips: 0, t0: null, over: false, frac: null}; $('playMsg').textContent = ''; $('flip').disabled = false; $('bet').value = '5'; setQ(null); drawPlay(); }
+  function left() { if (!G.t0) return 1800; return Math.max(0, 1800 - (Date.now() - G.t0) / 1000); }
+  function endIf() {
+    var why = null;
+    if (G.w >= 250) { G.w = 250; why = 'You hit the $250 cap. Game over: that is the most anyone could take home.'; }
+    else if (G.w < 0.01) why = 'Bust. Nothing left to bet.';
+    else if (G.flips >= 300) why = 'That was flip 300. Game over.';
+    else if (left() <= 0) why = 'Thirty minutes are up. Game over.';
+    if (why) { G.over = true; $('flip').disabled = true; $('playMsg').textContent = why; }
+  }
+  function cats() {
+    var w = G.w, me = G.flips === 0 ? -1 : (w < 2 ? 0 : w < 25 ? 1 : w < 200 ? 2 : 3);
+    var rows = [['Went bust (under $2)', '28%'], ['Finished below $25, not bust', 'about 5%'], ['In between (averaged $75)', '51%'], ['Maxed out ($200 or more)', '21%']];
+    $('cats').innerHTML = rows.map(function (r, i) { return '<div class="cat' + (i === me ? ' me' : '') + '"><span>' + r[0] + (i === me ? ' · <b>you, right now</b>' : '') + '</span><span>' + r[1] + '</span></div>'; }).join('');
+  }
+  function drawPath(c, pts, start, capv) {
+    var x = c.getContext('2d'), W = c.width, H = c.height, pad = 30; x.clearRect(0, 0, W, H);
+    var mx = Math.max(capv || 0, start * 2, Math.max.apply(null, pts)) * 1.05, n = Math.max(pts.length - 1, 10);
+    var X = function (i) { return pad + (W - 2 * pad) * i / n; }, Y = function (v) { return H - pad - (H - 2 * pad) * v / mx; };
+    x.strokeStyle = css('--muted'); x.setLineDash([8, 8]); x.lineWidth = 2; x.beginPath(); x.moveTo(pad, Y(start)); x.lineTo(W - pad, Y(start)); x.stroke(); x.setLineDash([]);
+    if (capv) { x.strokeStyle = css('--teal'); x.beginPath(); x.moveTo(pad, Y(capv)); x.lineTo(W - pad, Y(capv)); x.stroke(); x.fillStyle = css('--teal'); x.font = '800 20px Montserrat, sans-serif'; x.fillText('$' + capv + ' cap', pad + 6, Y(capv) - 8); }
+    x.strokeStyle = css('--red'); x.lineWidth = 4; x.beginPath(); pts.forEach(function (v, i) { if (i) x.lineTo(X(i), Y(v)); else x.moveTo(X(i), Y(v)); }); x.stroke();
+  }
+  function drawPlay() {
+    $('bank').textContent = money(G.w, 2);
+    var sec = Math.ceil(left()); $('clock').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + ' left · ' + G.flips + ' of 300 flips';
+    var share = G.w > 0 ? Math.round(100 * (parseFloat($('bet').value) || 0) / G.w) : 0;
+    $('bankSub').textContent = G.flips ? 'Your next bet is ' + share + '% of what you have. The Kelly rule says 20%.' : 'Bet a slice, pick a side, flip.';
+    drawPath($('pathC'), G.path, 25, 250); cats();
+  }
+  function setQ(f) { G.frac = f; document.querySelectorAll('[data-q]').forEach(function (b) { b.setAttribute('aria-pressed', parseFloat(b.getAttribute('data-q')) === f ? 'true' : 'false'); }); if (f) $('bet').value = (Math.max(0.01, Math.floor(G.w * f * 100) / 100)).toFixed(2); }
+  document.querySelectorAll('[data-q]').forEach(function (b) { b.addEventListener('click', function () { setQ(parseFloat(b.getAttribute('data-q'))); drawPlay(); }); });
+  $('bet').addEventListener('input', function () { setQ(null); drawPlay(); });
+  $('restart').addEventListener('click', newGame);
+  $('flip').addEventListener('click', function () {
+    if (G.over) return; if (!G.t0) G.t0 = Date.now(); endIf(); if (G.over) { drawPlay(); return; }
+    var b = Math.floor((parseFloat($('bet').value) || 0) * 100) / 100;
+    if (b < 0.01) { $('playMsg').textContent = 'Enter a bet of at least 1 cent.'; return; }
+    if (b > G.w + 1e-9) { $('playMsg').textContent = 'You only have ' + money(G.w, 2) + '.'; return; }
+    $('playMsg').textContent = '';
+    var heads = rand() < 0.6, win = (heads ? 'H' : 'T') === $('side').value;
+    G.w = +(G.w + (win ? b : -b)).toFixed(2); G.flips++; G.path.push(G.w);
+    var coin = $('coin'); coin.classList.remove('spin'); void coin.offsetWidth; coin.classList.add('spin'); coin.textContent = heads ? 'H' : 'T'; coin.classList.toggle('t', !heads);
+    if (G.frac && G.w > 0) $('bet').value = (Math.max(0.01, Math.floor(G.w * G.frac * 100) / 100)).toFixed(2);
+    else if (G.w > 0 && parseFloat($('bet').value) > G.w) $('bet').value = G.w.toFixed(2);
+    endIf(); drawPlay();
+  });
+  setInterval(function () { if (G && G.t0 && !G.over) { endIf(); drawPlay(); } }, 1000);
+
+  // ---------- MODE 2: simulate ----------
+  var NAMES = {allin: 'All in', fixed: 'Fixed $', double: 'Doubling', frac: 'Fixed %', kelly: 'Kelly', half: 'Half-Kelly'};
+  function simOpts(strategy) {
+    var p = Math.min(0.99, Math.max(0.01, (parseFloat($('sp').value) || 60) / 100));
+    var fixedV = Math.max(0.01, parseFloat($('fixed').value) || 1);
+    return {start: Math.max(1, parseFloat($('sStart').value) || 25), p: p, cap: Math.max(0, parseFloat($('sCap').value) || 0), flips: Math.min(2000, Math.max(1, parseInt($('sFlips').value, 10) || 300)),
+      players: Math.min(5000, Math.max(10, parseInt($('sN').value, 10) || 1000)), seed: parseInt($('sSeed').value, 10) || 0,
+      strategy: strategy || $('strat').value, frac: (parseFloat($('frac').value) || 20) / 100, fixed: fixedV, base: fixedV};
+  }
+  function label(s, o) { if (s === 'fixed') return 'Fixed ' + money(o.fixed, o.fixed % 1 ? 2 : 0) + ' a flip'; if (s === 'double') return 'Doubling from ' + money(o.base, o.base % 1 ? 2 : 0); if (s === 'frac') return 'Fixed ' + Math.round(o.frac * 100) + '%'; if (s === 'kelly') return 'Kelly ' + Math.round(Math.max(0, 2 * o.p - 1) * 1000) / 10 + '%'; if (s === 'half') return 'Half-Kelly ' + Math.round(Math.max(0, 2 * o.p - 1) * 500) / 10 + '%'; return NAMES[s]; }
+  function hist(c, ends, start, capv) {
+    var x = c.getContext('2d'), W = c.width, H = c.height, pad = 34; x.clearRect(0, 0, W, H);
+    var lg = !capv && ends[ends.length - 1] > start * 40, B = 12, edges = [];
+    var hi = capv || ends[ends.length - 1] || start * 2;
+    for (var i = 0; i <= B; i++) edges.push(lg ? (i === 0 ? 0 : Math.pow(10, Math.log10(2) + (Math.log10(hi) - Math.log10(2)) * (i - 1) / (B - 1))) : hi * i / B);
+    var counts = new Array(B).fill(0); ends.forEach(function (v) { for (var k = B - 1; k >= 0; k--) if (v >= edges[k]) { counts[Math.min(k, B - 1)]++; break; } });
+    var mx = Math.max.apply(null, counts) || 1, bw = (W - 2 * pad) / B;
+    counts.forEach(function (cn, k) { var h = (H - 2 * pad - 14) * cn / mx; x.fillStyle = edges[k + 1] <= 2 ? css('--red') : edges[k] < start ? '#F39A7E' : (capv && k === B - 1) ? css('--teal') : css('--blue'); x.fillRect(pad + k * bw + 3, H - pad - h, bw - 6, h); });
+    x.fillStyle = css('--muted'); x.font = '700 18px Montserrat, sans-serif'; x.textAlign = 'left'; x.fillText('$0', pad, H - 8); x.textAlign = 'right'; x.fillText(lg ? big(hi) + ' (log scale)' : money(hi, 0), W - pad, H - 8);
+  }
+  function runSim() {
+    var o = simOpts(), r = simulate(o), s = o.strategy;
+    $('fFixed').hidden = !(s === 'fixed' || s === 'double'); $('fFrac').hidden = s !== 'frac'; $('fracV').textContent = Math.round(o.frac * 100);
+    $('sKick').textContent = label(s, o) + ' · ' + o.players.toLocaleString('en-US') + ' players × ' + o.flips + ' flips';
+    if (o.cap) { $('sHead').textContent = pc(r.cap) + ' hit the cap'; $('sSub').textContent = pc(r.bust) + ' went bust and ' + pc(r.below) + ' ended below the ' + money(o.start, 0) + ' start.'; }
+    else { $('sHead').textContent = 'Typical player: ' + big(r.median); $('sSub').textContent = 'Average player: ' + big(r.mean) + '. ' + pc(r.below) + ' ended below the ' + money(o.start, 0) + ' start. The average is pulled up by a few lucky streaks; you only live one path.'; }
+    $('sStats').innerHTML = [[pc(r.bust), 'went bust (under $2)'], [pc(r.below), 'ended below start'], [big(r.median), 'typical (median) player'], [o.cap ? pc(r.cap) : big(r.mean), o.cap ? 'reached the ' + money(o.cap, 0) + ' cap' : 'average player']].map(function (a) { return '<div class="stat"><b>' + a[0] + '</b><span>' + a[1] + '</span></div>'; }).join('');
+    hist($('histC'), r.ends, o.start, o.cap); $('histNote').textContent = 'Red = bust, orange = below start' + (o.cap ? ', teal = at the cap.' : '.');
+    var rows = ['allin', 'fixed', 'double', 'frac', 'kelly', 'half'].map(function (k) { var q = simOpts(k), z = simulate(q); return '<tr' + (k === s ? ' style="background:rgba(255,201,60,.18)"' : '') + '><td>' + label(k, q) + '</td><td class="' + (z.bust > 10 ? 'bad' : '') + '">' + pc(z.bust) + '</td><td>' + pc(z.below) + '</td><td>' + big(z.median) + '</td><td class="' + (q.cap && z.cap > 80 ? 'good' : '') + '">' + (q.cap ? pc(z.cap) : big(z.mean)) + '</td></tr>'; }).join('');
+    $('cmp').innerHTML = '<tr><th>Strategy</th><th>Bust</th><th>Below start</th><th>Median</th><th>' + (o.cap ? 'Hit cap' : 'Average') + '</th></tr>' + rows;
+    try { localStorage.setItem(KEY, JSON.stringify(simState())); } catch (e) {}
+  }
+  var SIM_IDS = ['strat', 'fixed', 'frac', 'sp', 'sStart', 'sFlips', 'sCap', 'sN', 'sSeed'];
+  function simState() { var o = {}; SIM_IDS.forEach(function (k) { o[k] = $(k).value; }); return o; }
+  function loadSim(o) { SIM_IDS.forEach(function (k) { if (o[k] != null) $(k).value = o[k]; }); runSim(); }
+  var FOUR = {strat: 'frac', fixed: '1', frac: '20', sp: '60', sStart: '25', sFlips: '300', sCap: '250', sN: '1000', sSeed: '2016'};
+  var AVG = {strat: 'frac', fixed: '1', frac: '40', sp: '60', sStart: '25', sFlips: '300', sCap: '0', sN: '1000', sSeed: '2016'};
+  $('pFour').addEventListener('click', function () { loadSim(FOUR); });
+  $('pAvg').addEventListener('click', function () { loadSim(AVG); });
+  var tm; SIM_IDS.forEach(function (k) { $(k).addEventListener('input', function () { clearTimeout(tm); tm = setTimeout(runSim, 120); }); });
+
+  // ---------- MODE 3: your odds ----------
+  function growth(f, p, b, l) { if (f * l >= 1) return -Infinity; return p * Math.log(1 + f * b) + (1 - p) * Math.log(1 - f * l); }
+  function odds() {
+    var p = Math.min(1, Math.max(0, (parseFloat($('kp').value) || 0) / 100)), b = Math.max(0.01, parseFloat($('kb').value) || 1), l = Math.min(1, Math.max(0.01, parseFloat($('kl').value) || 1));
+    var k = (p * b - (1 - p) * l) / (b * l), kc = Math.max(0, Math.min(1 / l, k));
+    var gk = growth(kc, p, b, l), gh = growth(kc / 2, p, b, l), g2 = growth(Math.min(2 * kc, 0.999 / l), p, b, l);
+    if (k <= 0) { $('kHead').textContent = 'Bet 0%'; $('kSub').textContent = 'With these odds there is no edge. Any bet loses money over time, so the right size is zero.'; }
+    else { $('kHead').textContent = 'Full ' + pc(Math.round(kc * 1000) / 10) + ' · half ' + pc(Math.round(kc * 500) / 10); $('kSub').textContent = 'Of what you have now, recalculated after every win or loss. Start with the half.'; }
+    var gp = function (g) { return isFinite(g) ? (Math.round((Math.exp(g) - 1) * 10000) / 100).toFixed(2) + '%' : '−100%'; };
+    $('kStats').innerHTML = [[k > 0 ? gp(gk) : '0%', 'typical growth per bet at full Kelly'], [k > 0 ? gp(gh) : '0%', 'at half-Kelly (' + (k > 0 && gk > 0 ? Math.round(100 * gh / gk) : 0) + '% of the growth)'], [k > 0 ? gp(g2) : '—', 'at double Kelly'], [(Math.round((p * b - (1 - p) * l) * 1000) / 10) + '¢', 'average profit per $1 bet']].map(function (a) { return '<div class="stat"><b>' + a[0] + '</b><span>' + a[1] + '</span></div>'; }).join('');
+    var c = $('growC'), x = c.getContext('2d'), W = c.width, H = c.height, pad = 34; x.clearRect(0, 0, W, H);
+    var fmax = Math.min(1 / l * 0.99, Math.max(0.1, kc * 3)), pts = [], N = 120;
+    for (var i = 0; i <= N; i++) { var f = fmax * i / N; pts.push([f, growth(f, p, b, l)]); }
+    var gmax = Math.max(1e-6, Math.max.apply(null, pts.map(function (q) { return q[1]; }))), gmin = -gmax * 1.2;
+    var X = function (f) { return pad + (W - 2 * pad) * f / fmax; }, Y = function (g) { return pad + (H - 2 * pad) * (gmax - Math.max(gmin, g)) / (gmax - gmin); };
+    x.strokeStyle = css('--muted'); x.lineWidth = 2; x.beginPath(); x.moveTo(pad, Y(0)); x.lineTo(W - pad, Y(0)); x.stroke();
+    x.strokeStyle = css('--teal'); x.lineWidth = 5; x.beginPath(); pts.forEach(function (q, i) { if (i) x.lineTo(X(q[0]), Y(q[1])); else x.moveTo(X(q[0]), Y(q[1])); }); x.stroke();
+    if (k > 0) { [[kc, 'Kelly', css('--red')], [kc / 2, 'half', css('--blue')]].forEach(function (m) { x.fillStyle = m[2]; x.beginPath(); x.arc(X(m[0]), Y(growth(m[0], p, b, l)), 9, 0, 7); x.fill(); x.font = '800 20px Montserrat, sans-serif'; x.textAlign = 'center'; x.fillText(m[1] + ' ' + Math.round(m[0] * 100) + '%', X(m[0]), Y(growth(m[0], p, b, l)) - 18); }); }
+    x.fillStyle = css('--muted'); x.font = '700 18px Montserrat, sans-serif'; x.textAlign = 'left'; x.fillText('0%', pad, H - 8); x.textAlign = 'right'; x.fillText(Math.round(fmax * 100) + '% of bankroll per bet', W - pad, H - 8);
+  }
+  ['kp', 'kb', 'kl'].forEach(function (k) { $(k).addEventListener('input', odds); });
+
+  // ---------- start ----------
+  newGame();
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (saved && typeof saved === 'object') SIM_IDS.forEach(function (k) { if (saved[k] != null) $(k).value = saved[k]; }); else SIM_IDS.forEach(function (k) { $(k).value = FOUR[k]; });
+  var h = (location.hash || '').toLowerCase(); if (h === '#simulate') show(1); else if (h === '#odds') show(2);
+})();
+</script>
+</body>
+</html>

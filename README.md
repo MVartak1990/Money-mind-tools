@@ -2,6 +2,7 @@
 
 Free calculators from **The Extraordinary Money Mind** YouTube channel, hosted on GitHub Pages:
 
+- Coin Flip Challenge (play the 60/40 coin flip experiment, simulate 1,000 players by strategy, Kelly and half-Kelly for your own odds): `/coin-flip-challenge/`
 - Escape Number (Millionaire Fastlane: how much you need to escape the 9-to-5, Slowlane vs Fastlane in years; any currency): `/escape-number/`
 - Tax Now or Later (Roth vs traditional, TFSA vs RRSP, ISA vs pension: rate now vs later, clawbacks, the refund; any currency): `/tax-now-or-later/`
 - Fair split calculator for couples (50/50 vs split by income vs one joint account, any currency): `/fair-split/`
