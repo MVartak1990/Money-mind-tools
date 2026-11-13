@@ -2,6 +2,7 @@
 
 Free calculators from **The Extraordinary Money Mind** YouTube channel, hosted on GitHub Pages:
 
+- The Babylon Rule (pay yourself first from The Richest Man in Babylon: savings with earnings kept vs spent, 10/70/20 debt-free date; any currency): `/babylon-rule/`
 - Coin Flip Challenge (play the 60/40 coin flip experiment, simulate 1,000 players by strategy, Kelly and half-Kelly for your own odds): `/coin-flip-challenge/`
 - Escape Number (Millionaire Fastlane: how much you need to escape the 9-to-5, Slowlane vs Fastlane in years; any currency): `/escape-number/`
 - Tax Now or Later (Roth vs traditional, TFSA vs RRSP, ISA vs pension: rate now vs later, clawbacks, the refund; any currency): `/tax-now-or-later/`

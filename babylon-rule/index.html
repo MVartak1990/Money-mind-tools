@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Babylon Rule calculator: pay yourself first · The Money Knowledge Guy</title>
+<meta name="description" content="Free pay-yourself-first calculator based on The Richest Man in Babylon: keep a part of every paycheck, see your savings after N years with the earnings kept vs spent, and get a 10/70/20 debt-free date. Any currency, no sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Babylon Rule calculator">
+<meta property="og:description" content="Keep a tenth first, never eat the children: see your purse with the earnings kept vs spent, and your 10/70/20 debt-free date. Any currency, no sign-up.">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial' font-weight='900' font-size='34' text-anchor='middle' fill='%23FFC93C'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: brand band with the 4 Babylon Rule steps, then inputs (left) and a sticky result stack (right): purse card with a two-line chart, then the 10/70/20 debt card. One column on phones. */
+:root {
+  --navy: #14213D; --yellow: #FFC93C; --red: #E4572E; --cream: #FFF6E5; --teal: #1B998B; --blue: #1F5FD1; --pink: #FF8AB6;
+  --bg: #FFF6E5; --surface: #FFFFFF; --ink: #14213D; --muted: #5A6480; --line: #E6DCC6; --field: #FFFDF8; --track: #F1E8D4; --grid: #EDE3CF;
+  --shadow: 0 1px 0 rgba(20,33,61,.06), 0 8px 24px -14px rgba(20,33,61,.35);
+  --display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1830; --surface: #14213D; --ink: #FFF6E5; --muted: #A9B2C8; --line: #26355A; --field: #0F1A33; --track: #22305A; --grid: #22305A;
+  --shadow: 0 1px 0 rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.8); color-scheme: dark } }
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body { background: var(--bg); color: var(--ink); font-family: var(--display); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.band { background: #14213D; color: var(--cream) }
+header.band .wrap { padding-block: 28px 26px; display: grid; gap: 12px }
+.kicker { font: 800 12px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--yellow) }
+h1 { font: 900 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance }
+.qs { display: flex; flex-wrap: wrap; gap: 8px }
+.qs span { font: 800 12.5px/1 var(--display); letter-spacing: .04em; padding: 8px 11px; border-radius: 8px; color: var(--navy) }
+.q1 { background: var(--yellow) } .q2 { background: #2FC2B0 } .q3 { background: #8FB2FF } .q4 { background: var(--pink) }
+.lede { max-width: 72ch; color: rgba(255,246,229,.84); margin: 0 }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 18px 6px }
+.presets .lbl { font: 700 12px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px }
+button { font: 700 13px/1 var(--display); padding: 9px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px }
+.note { font-size: 12.5px; color: var(--muted); margin: 0 }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 22px; align-items: start; padding-block: 12px 40px }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } .result { position: static !important } }
+.steps { display: grid; gap: 14px; min-width: 0 }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 18px; display: grid; gap: 12px; box-shadow: var(--shadow); min-width: 0 }
+.step h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 800 17px/1.2 var(--display) }
+.num { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; display: grid; place-items: center; color: var(--navy); font: 900 14px/1 var(--display) }
+.hint { margin: -4px 0 0; color: var(--muted); font-size: 13px }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px }
+.f { display: grid; gap: 5px; min-width: 0; align-content: start }
+.f label { font: 700 12.5px/1.25 var(--display) }
+.f small { color: var(--muted); font-size: 11.5px; line-height: 1.3 }
+input, select { width: 100%; font: 700 15px/1 var(--display); color: var(--ink); background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0 }
+input[type="number"] { -moz-appearance: textfield }
+input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color: var(--teal) }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; font-weight: 600 }
+.debts { display: grid; gap: 8px }
+.drow { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr) 40px; gap: 8px; align-items: end }
+.drow .x { padding: 9px 0; width: 40px; border-radius: 10px }
+@media (max-width: 520px) { .drow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .drow .f:first-child { grid-column: 1 / -1 } .drow .x { width: 100% } }
+.split { display: grid; grid-template-columns: 10fr 70fr 20fr; height: 30px; border-radius: 10px; overflow: hidden; font: 900 12px/30px var(--display); text-align: center; color: var(--navy) }
+.split div:nth-child(1) { background: var(--yellow) } .split div:nth-child(2) { background: #8FB2FF } .split div:nth-child(3) { background: var(--pink) }
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 12px; min-width: 0 }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; display: grid; gap: 10px }
+.card h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 800 13px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase }
+.chip { font: 900 11px/1 var(--display); letter-spacing: .08em; padding: 6px 8px; border-radius: 7px; color: #fff; white-space: nowrap }
+.c-red { background: var(--red) } .c-teal { background: var(--teal) } .c-pink { background: #C2386F }
+.sub { font-size: 12.5px; color: var(--muted) }
+.headline { background: #14213D; color: var(--cream); border: 0 }
+.headline .sub { color: rgba(255,246,229,.82) }
+.headline .big { font: 900 clamp(24px, 5vw, 30px)/1.12 var(--display) }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.stat { border-radius: 12px; padding: 10px 12px; border: 1.5px solid var(--line) }
+.stat .l { font: 800 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.stat .v { font: 900 22px/1.2 var(--display) }
+.stat.k { border-color: var(--teal) } .stat.k .v { color: var(--teal) }
+.stat.e { border-color: var(--red) } .stat.e .v { color: var(--red) }
+svg text { font-family: var(--display) }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; font-weight: 700 }
+.legend i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px }
+.warn { color: var(--red); font-weight: 700 }
+table { width: 100%; border-collapse: collapse; font-size: 13px }
+th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line) }
+th { font: 800 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+td.r, th.r { text-align: right }
+footer { padding-block: 10px 40px; color: var(--muted); font-size: 12.5px }
+footer a { color: inherit }
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <div class="kicker">The Money Knowledge Guy · free calculator</div>
+  <h1>The Babylon Rule calculator</h1>
+  <div class="qs"><span class="q1">1 · Keep a tenth first</span><span class="q2">2 · Live on the rest</span><span class="q3">3 · No brickmaker advice</span><span class="q4">4 · Never eat the children</span></div>
+  <p class="lede">In <i>The Richest Man in Babylon</i>, a 1926 book of parables, a poor scribe learns one sentence: a part of all you earn is yours to keep. Enter your take-home pay to see what keeping a part of every paycheck grows to when its earnings stay in, versus when you spend them, and, if you owe money, your debt-free date on the 10 / 70 / 20 plan. The math works in any currency.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="presets" role="group" aria-label="Examples">
+    <span class="lbl">Load</span>
+    <button type="button" id="pMateo" aria-pressed="false">Mateo (video example)</button>
+    <button type="button" id="pBlank" aria-pressed="false">Start blank</button>
+    <span class="note">Everything stays in your browser. No sign-up, no tracking.</span>
+  </div>
+
+  <div class="grid">
+    <div class="steps">
+      <section class="step">
+        <h2><span class="num" style="background:var(--yellow)">1</span>Keep a part first</h2>
+        <p class="hint">Use monthly take-home pay: what actually lands in your account. Keep it on payday, before any bill, with an automatic transfer.</p>
+        <div class="fields">
+          <div class="f"><label for="cur">Currency</label><select id="cur"></select></div>
+          <div class="f"><label for="pay">Take-home pay / month</label><input id="pay" type="number" inputmode="decimal" min="0" step="1"></div>
+          <div class="f"><label for="keep">% you keep</label><input id="keep" type="number" inputmode="decimal" min="0" max="100" step="0.5"><small>The book says not less than a tenth. Start where you can.</small></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#2FC2B0">2</span>Let it work</h2>
+        <p class="hint">A yearly return is an assumption, not a promise. Real returns go up and down; 6% is the video's example.</p>
+        <div class="fields">
+          <div class="f"><label for="ret">Yearly return %</label><input id="ret" type="number" inputmode="decimal" min="0" max="30" step="0.1"></div>
+          <div class="f"><label for="yrs">Years</label><input id="yrs" type="number" inputmode="numeric" min="1" max="60" step="1"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:var(--pink)">3</span>In debt? Dabasir's tablets</h2>
+        <p class="hint">Ten percent kept, seventy to live on, twenty to the people you owe, split by balance, every payday, until it's gone. Leave this empty if you owe nothing.</p>
+        <div class="split" aria-hidden="true"><div>10 KEEP</div><div>70 LIVE ON</div><div>20 DEBT</div></div>
+        <div class="debts" id="debts"></div>
+        <div><button type="button" id="addDebt">+ Add a debt</button></div>
+        <label class="check"><input type="checkbox" id="join"><span>When the debt is gone, add the 20% to what you keep (the purse above then includes it)</span></label>
+      </section>
+
+      <section class="step">
+        <h2><span class="num" style="background:#8FB2FF">4</span>Guard it</h2>
+        <p class="hint">Before acting on a money tip, ask two questions: what do you do for a living, and how much of your own money is in this? And never put in so much that one bad call wipes you out.</p>
+      </section>
+    </div>
+
+    <aside class="result" aria-live="polite">
+      <div class="card headline">
+        <div class="kicker">The children of your savings</div>
+        <div class="big" id="head">—</div>
+        <div class="sub" id="headSub"></div>
+      </div>
+      <div class="card">
+        <h3>Your purse <span class="chip c-teal" id="perMo">—</span></h3>
+        <div class="two">
+          <div class="stat k"><div class="l">Earnings kept in</div><div class="v" id="vKept">—</div></div>
+          <div class="stat e"><div class="l">Earnings spent</div><div class="v" id="vEaten">—</div></div>
+        </div>
+        <svg id="chart" viewBox="0 0 400 220" role="img" aria-label="Savings over time, earnings kept versus spent" style="width:100%;height:auto;display:block"></svg>
+        <div class="legend"><span><i style="background:var(--teal)"></i>Earnings kept in</span><span><i style="background:var(--red)"></i>Earnings spent each year</span></div>
+        <div class="sub" id="purseSub"></div>
+      </div>
+      <div class="card" id="debtCard"></div>
+      <p class="note">How it works: the part you keep is moved at the end of each month and earns the yearly return compounded monthly. "Earnings spent" takes out everything the savings earned at the end of each year, so the purse stays at what you put in. The 10/70/20 plan pays 20% of take-home pay a month toward debts, split by balance each month, with interest monthly at each debt's yearly rate (APR ÷ 12). "Minimum only" assumes 1% of the balance plus that month's interest, at least 40 a month. Amounts are rounded to whole units. Before inflation and tax.</p>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p>From the video “The Richest Man in Babylon: Why You Still Have Nothing” by The Money Knowledge Guy. The parables come from <i>The Richest Man in Babylon</i> by George S. Clason (1926), a work of fiction. Mateo is an example. Average card rate: Federal Reserve G.19 (accounts assessed interest, Q3 2026: 22.36%). Education only, not financial advice. <a href="../">More calculators</a></p>
+</footer>
+
+<script>
+(function () {
+  var CUR = [['USD','en-US'],['CAD','en-CA'],['GBP','en-GB'],['EUR','de-DE'],['INR','en-IN'],['AUD','en-AU'],['NZD','en-NZ'],['SGD','en-SG'],['ZAR','en-ZA'],['PHP','en-PH']];
+  var MATEO = {cur: 'USD', pay: '4000', keep: '10', ret: '6', yrs: '20', join: false, debts: [{n: 'Credit card', b: '6000', r: '22.36'}]};
+  var BLANK = {cur: 'USD', pay: '', keep: '10', ret: '6', yrs: '20', join: true, debts: []};
+  var KEY = 'babylon-rule-v1', IDS = ['cur', 'pay', 'keep', 'ret', 'yrs'];
+  var $ = function (id) { return document.getElementById(id); };
+  var cur = $('cur');
+  CUR.forEach(function (c) { var o = document.createElement('option'); o.value = c[0]; o.textContent = c[0]; cur.appendChild(o); });
+  function loc() { for (var i = 0; i < CUR.length; i++) if (CUR[i][0] === cur.value) return CUR[i][1]; return 'en-US'; }
+  function fmt(n) { var r = Math.round(n); if (Object.is(r, -0)) r = 0; try { return new Intl.NumberFormat(loc(), {style: 'currency', currency: cur.value, maximumFractionDigits: 0}).format(r); } catch (e) { return String(r); } }
+  function short(n) { var a = Math.abs(n); if (a >= 1e6) return (n / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M'; if (a >= 1e3) return Math.round(n / 1e3) + 'K'; return String(Math.round(n)); }
+  function num(v) { var x = parseFloat(v); return isFinite(x) && x >= 0 ? x : 0; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+  function months(m) { var y = Math.floor(m / 12), r = m % 12, s = []; if (y) s.push(y + (y === 1 ? ' year' : ' years')); if (r || !y) s.push(r + (r === 1 ? ' month' : ' months')); return s.join(' ') ; }
+  function dateIn(m) { var d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + m); try { return d.toLocaleDateString(loc(), {month: 'long', year: 'numeric'}); } catch (e) { return d.getFullYear() + '-' + (d.getMonth() + 1); } }
+
+  // ---- debts UI ----
+  var debtBox = $('debts'), rowN = 0;
+  function addRow(d) {
+    rowN++; var id = 'd' + rowN, div = document.createElement('div'); div.className = 'drow'; div.dataset.row = id;
+    div.innerHTML = '<div class="f"><label for="' + id + 'n">What you owe</label><input id="' + id + 'n" type="text" maxlength="24" placeholder="e.g. Credit card"></div>' +
+      '<div class="f"><label for="' + id + 'b">Balance</label><input id="' + id + 'b" type="number" inputmode="decimal" min="0" step="1"></div>' +
+      '<div class="f"><label for="' + id + 'r">APR %</label><input id="' + id + 'r" type="number" inputmode="decimal" min="0" max="100" step="0.01"></div>' +
+      '<button type="button" class="x" aria-label="Remove this debt">✕</button>';
+    debtBox.appendChild(div);
+    $(id + 'n').value = d && d.n || ''; $(id + 'b').value = d && d.b || ''; $(id + 'r').value = d && d.r || '';
+    ['n', 'b', 'r'].forEach(function (k) { $(id + k).addEventListener('input', calc); });
+    div.querySelector('.x').addEventListener('click', function () { div.remove(); calc(); });
+  }
+  function readDebts() {
+    return Array.prototype.map.call(debtBox.querySelectorAll('.drow'), function (row) {
+      var id = row.dataset.row; return {n: $(id + 'n').value, b: $(id + 'b').value, r: $(id + 'r').value};
+    });
+  }
+
+  // ---- maths ----
+  // Debt payoff: pay per month, split across open debts by current balance; overflow from a debt that finishes goes to the rest.
+  function payoff(debts, pay) {
+    var bal = debts.map(function (d) { return d.b; }), rate = debts.map(function (d) { return d.r / 100 / 12; });
+    var m = 0, paid = 0, start = bal.reduce(function (a, b) { return a + b; }, 0), done = debts.map(function () { return 0; });
+    if (start <= 0) return {m: 0, interest: 0, done: done};
+    while (m < 1200) {
+      m++;
+      for (var i = 0; i < bal.length; i++) bal[i] *= 1 + rate[i];
+      var left = pay, open;
+      for (var pass = 0; pass < bal.length && left > 1e-9; pass++) {
+        var tot = 0; open = [];
+        for (i = 0; i < bal.length; i++) if (bal[i] > 1e-9) { tot += bal[i]; open.push(i); }
+        if (!open.length) break;
+        var budget = left; left = 0;
+        open.forEach(function (j) { var share = budget * bal[j] / tot, p = Math.min(share, bal[j]); bal[j] -= p; paid += p; left += share - p; });
+      }
+      for (i = 0; i < bal.length; i++) if (bal[i] <= 1e-6 && !done[i]) { bal[i] = 0; done[i] = m; }
+      if (bal.every(function (x) { return x <= 1e-6; })) return {m: m, interest: paid - start, done: done};
+      if (pay <= 0) break;
+    }
+    return {m: Infinity, interest: Infinity, done: done};
+  }
+  function minimumOnly(d) {
+    var b = d.b, r = d.r / 100 / 12, m = 0, paid = 0;
+    while (b > 0.005 && m < 1200) { var i = b * r, p = Math.max(b * 0.01 + i, 40); p = Math.min(p, b + i); b = b + i - p; paid += p; m++; }
+    return {m: b > 0.005 ? Infinity : m, interest: paid - d.b};
+  }
+  // Purse: monthly contribution c(month) at month end, monthly compounding; eaten = earnings removed each year end.
+  function purse(contrib, r, years) {
+    var kept = 0, eaten = 0, fed = 0, put = 0, ptsK = [0], ptsE = [0];
+    for (var y = 0; y < years; y++) {
+      var startE = eaten, addE = 0;
+      for (var mo = 0; mo < 12; mo++) {
+        var c = contrib(y * 12 + mo + 1); put += c; addE += c;
+        kept = kept * (1 + r) + c; eaten = eaten * (1 + r) + c;
+      }
+      var earn = eaten - startE - addE; fed += earn; eaten -= earn;
+      ptsK.push(kept); ptsE.push(eaten);
+    }
+    return {kept: kept, eaten: eaten, fed: fed, put: put, ptsK: ptsK, ptsE: ptsE};
+  }
+
+  function chart(p, years) {
+    var W = 400, H = 220, L = 46, R = 12, T = 12, B = 28, max = Math.max(1, p.ptsK[years]);
+    var nice = Math.pow(10, Math.floor(Math.log10(max))), step = nice; [1, 2, 2.5, 5, 10].some(function (k) { step = k * nice / 4; return max / step <= 5; });
+    var top = Math.ceil(max / step) * step, x = function (i) { return L + (W - L - R) * i / years; }, y = function (v) { return T + (H - T - B) * (1 - v / top); };
+    var s = '';
+    for (var g = 0; g <= top + 1e-9; g += step) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="var(--grid)" stroke-width="1"/><text x="' + (L - 6) + '" y="' + (y(g) + 4) + '" font-size="10" fill="var(--muted)" text-anchor="end" font-weight="700">' + short(g) + '</text>';
+    var tick = years <= 10 ? 1 : years <= 20 ? 5 : 10;
+    for (var t = 0; t <= years; t += tick) s += '<text x="' + x(t) + '" y="' + (H - 9) + '" font-size="10" fill="var(--muted)" text-anchor="middle" font-weight="700">' + (t === 0 ? 'now' : 'yr ' + t) + '</text>';
+    function path(pts) { return pts.map(function (v, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' '); }
+    var area = path(p.ptsK) + ' L' + x(years) + ' ' + y(p.ptsE[years]) + ' ' + p.ptsE.slice().reverse().map(function (v, i) { return 'L' + x(years - i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' ') + ' Z';
+    s += '<path d="' + area + '" fill="var(--teal)" opacity=".12"/>';
+    s += '<path d="' + path(p.ptsE) + '" fill="none" stroke="var(--red)" stroke-width="3" stroke-linejoin="round"/>';
+    s += '<path d="' + path(p.ptsK) + '" fill="none" stroke="var(--teal)" stroke-width="3.5" stroke-linejoin="round"/>';
+    s += '<circle cx="' + x(years) + '" cy="' + y(p.ptsK[years]) + '" r="4.5" fill="var(--teal)"/><circle cx="' + x(years) + '" cy="' + y(p.ptsE[years]) + '" r="4.5" fill="var(--red)"/>';
+    $('chart').innerHTML = s;
+  }
+
+  function state() { var s = {}; IDS.forEach(function (k) { s[k] = $(k).value; }); s.join = $('join').checked; s.debts = readDebts(); return s; }
+  function load(s) {
+    IDS.forEach(function (k) { $(k).value = s[k] == null ? '' : s[k]; }); if (!$('cur').value) $('cur').value = 'USD';
+    $('join').checked = !!s.join; debtBox.innerHTML = ''; (s.debts || []).forEach(addRow); calc();
+  }
+
+  function calc() {
+    var pay = num($('pay').value), keep = Math.min(100, num($('keep').value)) / 100, r = num($('ret').value) / 100 / 12;
+    var years = Math.max(1, Math.min(60, Math.round(num($('yrs').value) || 1)));
+    var debts = readDebts().map(function (d) { return {n: d.n.trim() || 'Debt', b: num(d.b), r: num(d.r)}; }).filter(function (d) { return d.b > 0; });
+    var dp = 0.2 * pay, plan = payoff(debts, dp), join = $('join').checked && debts.length > 0 && isFinite(plan.m);
+    var base = keep * pay;
+    var contrib = function (m) { return join && m > plan.m ? base + dp : base; };
+    var p = purse(contrib, r, years);
+    $('perMo').textContent = fmt(base) + ' / MONTH';
+    $('vKept').textContent = fmt(p.kept); $('vEaten').textContent = fmt(p.eaten);
+    if (pay <= 0) { $('head').textContent = 'Enter your take-home pay'; $('headSub').textContent = ''; }
+    else if (keep <= 0) { $('head').textContent = 'Keep something first, even 1%'; $('headSub').textContent = 'A part of all you earn is yours to keep. Start small and raise it.'; }
+    else {
+      var gap = p.kept - p.eaten;
+      $('head').textContent = 'Spending the earnings costs you ' + fmt(gap);
+      $('headSub').textContent = 'Over ' + years + ' years you’d eat ' + fmt(p.fed) + ' of earnings, but give up ' + fmt(gap) + ', because the children have children.';
+    }
+    $('purseSub').innerHTML = 'You put in ' + fmt(p.put) + (join ? ' (your ' + Math.round(keep * 100) + '%, plus the freed 20% after the debt is gone)' : '') + '. Earnings kept in: <b>' + fmt(p.kept) + '</b>. Earnings spent every year: <b>' + fmt(p.eaten) + '</b>, just what you put in.';
+    chart(p, years);
+    // debt card
+    var dc = $('debtCard');
+    if (!debts.length) {
+      dc.innerHTML = '<h3>Debt-free date <span class="chip c-pink">10 / 70 / 20</span></h3><div class="sub">No debts entered. If you owe money, add each balance in step 3 to see your plan: ' + (pay > 0 ? fmt(0.1 * pay) + ' kept, ' + fmt(0.7 * pay) + ' to live on, ' + fmt(dp) + ' to debt' : '10% kept, 70% to live on, 20% to debt') + ' every month.</div>';
+    } else {
+      var tot = debts.reduce(function (a, d) { return a + d.b; }, 0), rows = '';
+      debts.forEach(function (d, i) {
+        var mn = minimumOnly(d);
+        rows += '<tr><td>' + esc(d.n) + '</td><td class="r">' + fmt(d.b) + '</td><td class="r">' + (isFinite(plan.m) ? months(plan.done[i]) : '—') + '</td><td class="r">' + (isFinite(mn.m) ? months(mn.m) : 'never') + '</td></tr>';
+      });
+      var body;
+      if (!isFinite(plan.m)) body = '<div class="warn">20% of your pay (' + fmt(dp) + ' a month) doesn’t cover the interest. Talk to the lenders or a non-profit credit counsellor about a lower rate or a payment plan.</div>';
+      else body = '<div class="big" style="font:900 26px/1.15 var(--display)">Debt-free in ' + months(plan.m) + '</div><div class="sub">' + dateIn(plan.m) + ' · ' + fmt(dp) + ' a month to debt, split by balance · about ' + fmt(plan.interest) + ' of interest on ' + fmt(tot) + '. Meanwhile you keep ' + fmt(0.1 * pay) + ' and live on ' + fmt(0.7 * pay) + '.</div>';
+      dc.innerHTML = '<h3>Debt-free date <span class="chip c-pink">10 / 70 / 20</span></h3>' + body +
+        '<table><thead><tr><th>Debt</th><th class="r">Balance</th><th class="r">10/70/20</th><th class="r">Minimum only</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<div class="sub">When the debt is gone, the 20% joins the part you keep' + (join ? ' (included in the purse above).' : '. Tick the box in step 3 to add it to the purse.') + '</div>';
+    }
+    var s = state(), m = JSON.parse(JSON.stringify(MATEO));
+    $('pMateo').setAttribute('aria-pressed', JSON.stringify(s) === JSON.stringify(m) ? 'true' : 'false'); $('pBlank').setAttribute('aria-pressed', 'false');
+    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  IDS.forEach(function (k) { $(k).addEventListener('input', calc); $(k).addEventListener('change', calc); });
+  $('join').addEventListener('change', calc);
+  $('addDebt').addEventListener('click', function () { addRow(null); calc(); });
+  $('pMateo').addEventListener('click', function () { load(MATEO); });
+  $('pBlank').addEventListener('click', function () { var b = JSON.parse(JSON.stringify(BLANK)); b.cur = cur.value; load(b); $('pBlank').setAttribute('aria-pressed', 'true'); });
+  var saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && typeof saved === 'object' && 'pay' in saved ? saved : MATEO);
+})();
+</script>
+</body>
+</html>
